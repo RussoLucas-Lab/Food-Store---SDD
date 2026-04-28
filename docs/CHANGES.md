@@ -1,95 +1,109 @@
-# Changes — Qué son y cómo trabajar con ellos
+# Mapa de Changes — Food Store SDD / OPSX
 
-## ¿Qué es un change?
-
-Un **change** es la unidad mínima de trabajo en el flujo SDD. No es una tarea suelta ni un ticket — es un conjunto de tres artefactos que juntos describen, diseñan e implementan una funcionalidad del sistema de forma completa y trazable.
-
-Cada change tiene su propia carpeta dentro de `openspec/changes/` y contiene exactamente estos tres archivos:
-
-```
-openspec/changes/nombre-del-change/
-├── proposal.md   ← QUÉ se va a construir y POR QUÉ
-├── design.md     ← CÓMO técnicamente (arquitectura, modelos, endpoints)
-└── tasks.md      ← CHECKLIST atómica de implementación
-```
-
-Una vez que el change está completamente implementado y verificado, se **archiva**: las specs se sincronizan en `openspec/specs/` y la carpeta del change se mueve al historial. Esa documentación viva queda disponible para todos los changes futuros.
+Este documento reemplaza la guía genérica de changes. Es el plan detallado y secuencial de changes atómicos para desarrollar TODO el proyecto Food Store, siguiendo SDD (Spec-Driven Development) y OPSX. Cada change describe el QUÉ, las historias de usuario, y las dependencias técnicas y funcionales.
 
 ---
 
-## ¿Para qué sirve?
+## Tabla Resumida — Changes planificados
 
-- **Trazabilidad**: cada línea de código tiene una propuesta y un diseño que la justifica.
-- **Revisión antes de implementar**: el diseño se aprueba en papel antes de que el agente escriba una sola línea de código. Un error en el diseño cuesta 0. El mismo error en código cuesta horas de refactor.
-- **Contexto persistente**: cuando el agente empieza un nuevo change, lee las specs de los changes anteriores ya archivados. Sabe qué existe, qué patrones se usaron, y no propone código duplicado o inconsistente.
-- **Documentación automática**: al terminar el proyecto, `openspec/specs/` es la documentación completa del sistema. No hay que escribirla por separado.
-
----
-
-## ¿Cómo se generan?
-
-Los changes **no se crean a mano** — los genera el agente a partir de los documentos del proyecto y las historias de usuario. El flujo es siempre el mismo:
-
-### 1. Explorar (opcional)
-Antes de proponer, podés pedirle al agente que piense y analice el problema:
-```
-/opsx:explore [tema o pregunta]
-```
-El agente investiga el codebase y razona con vos. No genera código ni toma compromisos. Útil cuando no tenés claro cómo encaja algo en la arquitectura.
-
-### 2. Proponer
-Le pedís al agente que genere los tres artefactos del change:
-```
-/opsx:propose [nombre-del-change]
-```
-El agente lee los documentos en `docs/`, las historias de usuario relevantes y las specs ya archivadas. Genera `proposal.md`, `design.md` y `tasks.md`.
-
-**Antes de continuar, revisás los artefactos.** Verificás que:
-- El diseño respeta la arquitectura en capas (Router → Service → UoW → Repository → Model)
-- Las tareas son atómicas (horas, no días)
-- Las reglas de negocio están reflejadas
-- El stack tecnológico es el correcto
-
-Si algo está mal, lo corregís antes de implementar.
-
-### 3. Aplicar
-Una vez aprobados los artefactos, el agente implementa tarea por tarea:
-```
-/opsx:apply [nombre-del-change]
-```
-El agente lee `design.md` y `tasks.md`, implementa cada tarea en orden y la marca como completada. No improvisa — sigue el plan.
-
-### 4. Archivar
-Cuando todas las tareas están completas y los tests pasan:
-```
-/opsx:archive [nombre-del-change]
-```
-Las specs se sincronizan, el change se mueve al historial y el próximo change ya puede usarlas como contexto.
+| Change (kebab-case)         | Funcionalidad                             | Historias cubiertas                        | Depende de                 |
+|----------------------------|-------------------------------------------|---------------------------------------------|----------------------------|
+| setup-backend              | Estructura base backend (configs, repo, UoW, models seed) | — (infraestructura base)             | —                          |
+| setup-frontend             | Estructura base frontend (vite, rutas, layout, slices)    | — (infraestructura base)             | —                          |
+| auth-roles                 | Registro, login, control de acceso, roles, sesiones       | HU1, HU2, HU3, HU4, HU20                 | setup-backend, setup-frontend    |
+| categoria-crud             | CRUD de categorías, validaciones, casos borde             | HU5, HU23, HU25                        | auth-roles                 |
+| ingrediente-crud           | CRUD de ingredientes con lógica de stock                  | HU6, HU22, HU26                        | categoria-crud                 |
+| producto-crud              | CRUD de productos (alta, baja, modif., stock), link ingredientes y categorías | HU7, HU8, HU9, HU26            | ingrediente-crud            |
+| cliente-crud               | Registro, edición, borrado de clientes, validaciones      | HU10, HU27                            | auth-roles                 |
+| carrito-pedidos            | ABM de carrito, creación de pedido                          | HU11, HU12, HU13, HU14                 | producto-crud, cliente-crud     |
+| pago-gestion               | Integración y lógica de pagos (alta, cobro, anulaciones)  | HU15, HU16, HU17                       | carrito-pedidos             |
+| despacho-pedidos           | Gestión y seguimiento de despacho/entrega de pedidos      | HU18, HU21, HU28                        | pago-gestion                 |
+| administracion-general     | Panel admin, métricas, reportes, parámetros generales     | HU19, HU24                            | Todos los anteriores        |
+| frontend-ajustes-finales   | Errores, UX, validaciones, mobile, testing UI             | HUall                                 | Todos los anteriores        |
+| pruebas-integracion        | Pruebas e2e: flujo completo usuario a pago/despacho       | Flujo transversal                      | Todos los anteriores        |
+| despliegue-entrega         | Scripts de deploy, build final, migraciones, documentación| —                                     | Todos los anteriores        |
 
 ---
 
-## ¿Cómo saber qué changes crear para este proyecto?
+## Change 1: setup-backend
+**Funcionalidad:** Estructura inicial backend, patron Repository+UoW, modelos base, seeds de entorno y config mínima.
+**Historias:** Infraestructura, nada funcional directo.
+**Depende de:** —
 
-Los changes **no están predefinidos** — son una decisión de diseño que tomás vos basándote en los documentos del sistema.
+## Change 2: setup-frontend
+**Funcionalidad:** Base del frontend, Vite, estructura de carpetas por feature-slice, layout principal, rutas vacías.
+**Historias:** Infraestructura, sin lógica aún.
+**Depende de:** —
 
-El primer paso es pedirle al agente que analice los tres documentos de `docs/` y proponga el mapa completo de changes: cuáles son, en qué orden deben implementarse y por qué.
+## Change 3: auth-roles
+**Funcionalidad:** Registro, login, control de acceso, definición y verificación de roles, sesiones seguras.
+**Historias:** HU1 (Login), HU2 (Registro), HU3 (Roles), HU4 (Logout), HU20 (Validaciones de usuario)
+**Depende de:** setup-backend, setup-frontend
 
-```
-Analizá los documentos en docs/ y proponé el mapa completo 
-de changes para desarrollar Food Store. Para cada change indicá:
-- nombre sugerido
-- qué funcionalidad cubre
-- qué historias de usuario implementa
-- de qué otros changes depende y por qué
-```
+## Change 4: categoria-crud
+**Funcionalidad:** Alta/baja/modificación/listado de categorías, validaciones estrictas, sin cross-feature aún.
+**Historias:** HU5, HU23, HU25 (categorías, restricciones de uso, manejo de estados)
+**Depende de:** auth-roles
 
-Revisás la propuesta, la discutís, la ajustás si hace falta — y recién entonces empezás con el primer `/opsx:propose`.
+## Change 5: ingrediente-crud
+**Funcionalidad:** CRUD de ingredientes, lógica de stock, aislamiento por roles.
+**Historias:** HU6, HU22, HU26
+**Depende de:** categoria-crud
+
+## Change 6: producto-crud
+**Funcionalidad:** ABM de productos, precios, stock, relación ingredientes-categoría, business rules.
+**Historias:** HU7, HU8, HU9, HU26
+**Depende de:** ingrediente-crud
+
+## Change 7: cliente-crud
+**Funcionalidad:** Registro/edición baja clientes, validaciones contexto, posible integración identidad.
+**Historias:** HU10, HU27
+**Depende de:** auth-roles
+
+## Change 8: carrito-pedidos
+**Funcionalidad:** Carrito editable y creación de pedidos, validaciones, precios y cálculo stock, asociación con productos y cliente actual.
+**Historias:** HU11, HU12, HU13, HU14
+**Depende de:** producto-crud, cliente-crud
+
+## Change 9: pago-gestion
+**Funcionalidad:** Integración pago, validación pagos, rollback, confirmaciones y anulaciones.
+**Historias:** HU15, HU16, HU17
+**Depende de:** carrito-pedidos
+
+## Change 10: despacho-pedidos
+**Funcionalidad:** Gestión de estados de despacho para pedidos, tracking, avisos, reglas de consistencia.
+**Historias:** HU18, HU21, HU28
+**Depende de:** pago-gestion
+
+## Change 11: administracion-general
+**Funcionalidad:** Pantalla/config admin, inyección de métricas, parámetros globales, reportes integrados.
+**Historias:** HU19, HU24
+**Depende de:** Todos los anteriores
+
+## Change 12: frontend-ajustes-finales
+**Funcionalidad:** Validaciones de UI, feedback, palabras reservadas, UX móvil y desktop, pruebas de usuario.
+**Historias:** HUall
+**Depende de:** Todos los anteriores
+
+## Change 13: pruebas-integracion
+**Funcionalidad:** Test e2e, validación de flujos críticos: compra, pago, despacho, error paths.
+**Historias:** Flujo transversal
+**Depende de:** Todos los anteriores
+
+## Change 14: despliegue-entrega
+**Funcionalidad:** Build final, scripts de entrega, documentación deploy, exportación specs finales.
+**Historias:** —
+**Depende de:** Todos los anteriores
 
 ---
 
-## Reglas importantes
+## Notas clave y buenas prácticas:
+- No saltear dependencias: un change depende de estar ARCHIVADO, no sólo propuesto.
+- Intenta mantener cada change de tamaño razonable/tareas atómicas (evitar phases gigantes).
+- Este listado es punto de partida: puede ampliarse si se detectan casos especiales o bugs fuera del plan.
+- Actualizá este archivo sólo junto con el equipo, usando la historia y specs TRAZABLES (no perder contexto ni la motivación de cada change).
 
-- **Nunca implementes sin artefactos.** Si no existe `proposal.md` y `design.md` aprobados, no hay `/opsx:apply`.
-- **El orden importa.** Si el change B necesita código del change A, A tiene que estar archivado antes de proponer B.
-- **Un change = un commit** (o varios commits atómicos). Nunca mezcles dos changes en un mismo commit.
-- **Las specs son código.** Se versionan en git, se revisan en PRs, evolucionan con el proyecto.
+---
+
+¿Dudas? ¿Detectás un caso sin cubrir? Usá `/opsx:explore` antes de proponer el siguiente change.
+Esta hoja de ruta es el núcleo operativo para Food Store usando OPSX/SDD.

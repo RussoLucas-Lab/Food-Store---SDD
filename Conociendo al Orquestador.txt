@@ -1,0 +1,42 @@
+¡Te cuento bien, hermano!
+¿Quién soy?
+Soy el coordinador/orquestador exclusivo del flujo OPSX (OpenSpec Experimental). No soy un bot de escribir código ni un simple asistente: mi trabajo es coordinar el ciclo de cambios usando el CLI openspec. No guardo el estado yo mismo, no adivino ni mantengo memoria de los artefactos—siempre confío en lo que dice el CLI. Pienso y te ayudo a moverte por el flujo, pero la verdad absoluta es lo que dice el comando.
+---
+¿Qué puedo hacer?
+- Ayudarte a explorar ideas o problemas (modo “explore”).
+- Proponer nuevos cambios (“propose”) y armar toda la estructura del cambio (propuesta, diseño, tareas, specs).
+- Coordinar la implementación (“apply”) — delego a skills especializadas para ejecutar tareas, modificar archivos, etc.
+- Cerrar y archivar los cambios (“archive”), asegurándome de que todo lo que ya se implementó se registre bien.
+Cada vez que quieras avanzar, yo:
+1. Veo el estado real: Corro openspec list --json y openspec status --change "<nombre>" --json para saber cómo están tus cambios y artefactos (propuesta, diseño, specs, tareas, etc.)
+2. Te oriento: Según tu pedido, te explico el siguiente paso o te ayudo a explorar, proponer, aplicar o archivar.
+3. Delego la ejecución: Cargo la skill que corresponda (no reinvento la rueda) para que haga el trabajo con las mejores prácticas.
+---
+Flujo de trabajo OPSX
+Este es el ciclo central. No es por fases rígidas: vos decidís cuándo avanzar, volver, o tocar otro paso:
+/opsx:explore   ← Pensá el tema, no creás nada aún
+   │
+   ▼
+/opsx:propose   ← Crea la propuesta, design, tasks, specs, todo en uno
+   │
+   ▼
+/opsx:apply     ← Implementás las tareas del cambio
+   │
+   ▼
+/opsx:archive   ← Sincronizás a specs definitivas y archivás el cambio
+- Podés volver a cualquier paso cuando quieras: no hay bloqueos, no hay “te olvidaste de un artefacto, vuelve para atrás”.
+- Si cambiás specs, propuestas, lo que sea—siempre el CLI es la verdad.
+- El estado está en el disco bajo openspec/changes/<nombre>/.
+---
+¿Cómo interactúo con vos?
+- Pido que querés hacer (explorar, proponer, aplicar, archivar)
+- NUNCA te digo “eso no se puede porque estás en tal fase” — acá el flujo es libre y dinámico.
+- Si dudás de qué hacer, pregunto al CLI real y te acompaño con el siguiente paso.
+- Para cualquier cosa especial (test de Go, skill propia, etc.) detecto y cargo el skill específico.
+---
+¿Por qué es así?
+Porque el OPSX prioriza la fluidez, la transparencia y el aprendizaje: todos pueden mirar el estado real, nadie queda bloqueado, la verdad está en disco y no en el aire.
+---
+¿Cómo sigo?
+Decime QUÉ QUERÉS HACER (por ejemplo, “quiero proponer un cambio X”, “quiero implementar las tareas Y”, “quiero archivar el cambio Z”) y yo te ayudo a correr el paso correcto y a cargar la skill adecuada.
+¿Listo para arrancar? ¿Querés explorar una idea, arrancar un cambio o aplicar algo? Decime y vamos, loco.
