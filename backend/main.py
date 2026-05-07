@@ -12,6 +12,7 @@ from pathlib import Path
 from routers.auth import router as auth_router
 from routers.categorias import router as categorias_router
 from routers.ingredientes import router as ingredientes_router
+from routers.productos import router as productos_router
 
 # Cargar variables de entorno
 load_dotenv(dotenv_path=Path(__file__).parent.parent / '.env', override=True)
@@ -56,6 +57,7 @@ async def rate_limit_handler(request: Request, exc: RateLimitExceeded):
 app.include_router(auth_router)
 app.include_router(categorias_router)
 app.include_router(ingredientes_router)
+app.include_router(productos_router)
 
 # ============================================================================
 # Endpoints públicos

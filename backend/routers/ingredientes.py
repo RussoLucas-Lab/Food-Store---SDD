@@ -288,6 +288,9 @@ def delete_ingrediente(
     """
     Marcar ingrediente como inactivo (soft delete).
     
+    Valida que no haya productos activos que lo usen como componente.
+    Si hay productos, retorna 409 Conflict.
+    
     Esta operación es idempotente: si el ingrediente ya está inactivo,
     retorna 204 sin cambios.
     
@@ -295,8 +298,21 @@ def delete_ingrediente(
         - 204: Ingrediente marcado como inactivo
         - 404: Ingrediente no encontrado
         - 403: Usuario no autorizado (no es admin)
+        - 409: Ingrediente está en uso por productos activos
     """
     try:
+        # NUEVO: Validar integridad - verificar que no hay productos activos
+        from backend.services.product_service import ProductService
+        product_service = ProductService(uow)
+        
+        try:
+            product_service.check_can_delete_ingredient(ingrediente_id)
+        except ValueError as e:
+            raise HTTPException(
+                status_code=409,
+                detail=str(e)
+            )
+        
         result = uow.ingredientes.soft_delete(ingrediente_id)
         if not result:
             raise HTTPException(

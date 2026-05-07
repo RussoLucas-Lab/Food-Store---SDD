@@ -230,6 +230,9 @@ def delete_categoria(
     """
     Marcar categoría como inactiva (soft delete).
     
+    Valida que no haya productos activos asignados a esta categoría.
+    Si hay productos, retorna 409 Conflict.
+    
     La categoría no se elimina de la BD, solo se marca como inactiva.
     Esta operación es idempotente.
     
@@ -237,6 +240,7 @@ def delete_categoria(
         - 204: Categoría marcada como inactiva
         - 403: Usuario no autorizado
         - 404: Categoría no encontrada
+        - 409: Categoría está en uso por productos activos
     """
     try:
         # Verificar existe
@@ -248,6 +252,19 @@ def delete_categoria(
                     status_code=404,
                     detail=f"Categoría {categoria_id} no encontrada"
                 )
+        
+        # NUEVO: Validar integridad - verificar que no hay productos activos
+        # Importamos aquí para evitar circular imports
+        from backend.services.product_service import ProductService
+        product_service = ProductService(uow)
+        
+        try:
+            product_service.check_can_delete_category(categoria_id)
+        except ValueError as e:
+            raise HTTPException(
+                status_code=409,
+                detail=str(e)
+            )
         
         # Soft delete (idempotente)
         uow.categorias.soft_delete(categoria_id)

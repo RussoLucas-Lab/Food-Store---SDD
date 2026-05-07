@@ -33,3 +33,15 @@ class IUnitOfWork(ABC):
     def ingredientes(self):
         """Repositorio de ingredientes"""
         pass
+    
+    @property
+    @abstractmethod
+    def productos(self):
+        """Repositorio de productos"""
+        pass
+    
+    @property
+    @abstractmethod
+    def product_ingredients(self):
+        """Repositorio de relaciones producto-ingrediente"""
+        pass

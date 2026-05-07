@@ -3,6 +3,7 @@ from repositories.inmemory import InMemoryRepository
 from repositories.usuario_repository import InMemoryUsuarioRepository
 from repositories.categoria_repository import InMemoryCategoriaRepository
 from repositories.ingrediente_repository import InMemoryIngredienteRepository
+from repositories.producto_repository import InMemoryProductRepository, InMemoryProductIngredientRepository
 
 class InMemoryUnitOfWork(IUnitOfWork):
     def __init__(self):
@@ -10,6 +11,8 @@ class InMemoryUnitOfWork(IUnitOfWork):
         self._usuarios = InMemoryUsuarioRepository()
         self._categorias = InMemoryCategoriaRepository()
         self._ingredientes = InMemoryIngredienteRepository()
+        self._productos = InMemoryProductRepository()
+        self._product_ingredients = InMemoryProductIngredientRepository()
         self.committed = False
 
     def commit(self):
@@ -36,3 +39,13 @@ class InMemoryUnitOfWork(IUnitOfWork):
     def ingredientes(self):
         """Repositorio de ingredientes"""
         return self._ingredientes
+    
+    @property
+    def productos(self):
+        """Repositorio de productos"""
+        return self._productos
+    
+    @property
+    def product_ingredients(self):
+        """Repositorio de relaciones producto-ingrediente"""
+        return self._product_ingredients
