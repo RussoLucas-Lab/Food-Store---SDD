@@ -103,7 +103,7 @@ class CategoryService:
             raise ValueError("Descripción no puede exceder 500 caracteres")
         
         # Verificar que categoría existe
-        categoria = self.uow.categorias.get_by_id(id)
+        categoria = self.uow.categorias.find_by_id(id)
         if not categoria:
             raise ValueError(f"Categoría {id} no existe")
         
@@ -113,9 +113,11 @@ class CategoryService:
             raise ValueError(f"Nombre '{nombre}' ya está en uso")
         
         # Actualizar
-        categoria.nombre = nombre
-        categoria.descripcion = descripcion or ""
-        self.uow.categorias.update(categoria)
+        categoria = self.uow.categorias.update(
+            categoria_id=id,
+            nombre=nombre,
+            descripcion=descripcion or ""
+        )
         self.uow.commit()
         
         return categoria.to_dict()
@@ -137,7 +139,7 @@ class CategoryService:
                        está en uso por productos activos (→ 409)
         """
         # Verificar que categoría existe
-        categoria = self.uow.categorias.get_by_id(id)
+        categoria = self.uow.categorias.find_by_id(id)
         if not categoria:
             raise ValueError(f"Categoría {id} no existe")
         
@@ -147,10 +149,11 @@ class CategoryService:
             raise ValueError(f"Categoría '{categoria.nombre}' está en uso por {products_using} productos activos")
         
         # Soft-delete
-        categoria.status = "inactive"
-        self.uow.categorias.update(categoria)
+        self.uow.categorias.soft_delete(id)
         self.uow.commit()
         
+        # Retornar el objeto actualizado
+        categoria = self.uow.categorias._storage.get(id)  # Acceso directo para dev
         return categoria.to_dict()
     
     def get_categoria(self, id: int) -> Dict:
@@ -166,7 +169,7 @@ class CategoryService:
         Raises:
             ValueError: Si ID no existe (→ 404)
         """
-        categoria = self.uow.categorias.get_by_id(id)
+        categoria = self.uow.categorias.find_by_id(id)
         if not categoria:
             raise ValueError(f"Categoría {id} no existe")
         
@@ -189,7 +192,7 @@ class CategoryService:
         Returns:
             Lista de dicts con categorías
         """
-        categorias = self.uow.categorias.list_all(skip=skip, limit=limit, search=search)
+        categorias = self.uow.categorias.list_active(skip=skip, limit=limit)
         
         # Convertir a dicts
         return [cat.to_dict() for cat in categorias]

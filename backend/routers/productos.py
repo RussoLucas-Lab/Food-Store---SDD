@@ -10,7 +10,7 @@ Proporciona 6 endpoints RESTful:
 - DELETE /api/productos/{id} (soft delete, admin-only)
 """
 
-from fastapi import APIRouter, HTTPException, Depends, Query
+from fastapi import APIRouter, HTTPException, Depends, Query, Path
 from typing import Optional
 from uow.inmemory import InMemoryUnitOfWork
 from backend.schemas.product_schema import (
@@ -173,7 +173,7 @@ def list_productos(
     description="Retorna información completa del producto incluyendo composición"
 )
 def get_product(
-    product_id: int = Query(..., gt=0, description="ID del producto"),
+    product_id: int = Path(..., gt=0, description="ID del producto"),
     user_id: Optional[int] = Depends(require_role(allow_customer=True))
 ):
     """
@@ -214,7 +214,7 @@ def get_product(
     description="Retorna el stock disponible calculado de un producto"
 )
 def get_product_stock(
-    product_id: int = Query(..., gt=0, description="ID del producto"),
+    product_id: int = Path(..., gt=0, description="ID del producto"),
     user_id: Optional[int] = Depends(require_role(allow_customer=True))
 ):
     """
@@ -252,7 +252,7 @@ def get_product_stock(
     description="Solo administradores pueden actualizar productos"
 )
 def update_product(
-    product_id: int = Query(..., gt=0, description="ID del producto"),
+    product_id: int = Path(..., gt=0, description="ID del producto"),
     req: ProductUpdateRequest = None,
     user_id: int = Depends(require_role("admin"))
 ):
@@ -322,7 +322,7 @@ def update_product(
     description="Solo administradores pueden eliminar productos (soft delete)"
 )
 def delete_product(
-    product_id: int = Query(..., gt=0, description="ID del producto"),
+    product_id: int = Path(..., gt=0, description="ID del producto"),
     user_id: int = Depends(require_role("admin"))
 ):
     """

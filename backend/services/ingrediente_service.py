@@ -134,7 +134,7 @@ class IngredientService:
             ValueError: Si validación falla
         """
         # Verificar que existe
-        ingrediente = self.uow.ingredientes.get_by_id(id)
+        ingrediente = self.uow.ingredientes.find_by_id(id)
         if not ingrediente:
             raise ValueError(f"Ingrediente {id} no existe")
         
@@ -203,7 +203,7 @@ class IngredientService:
                        está en uso por productos activos (→ 409)
         """
         # Verificar que existe
-        ingrediente = self.uow.ingredientes.get_by_id(id)
+        ingrediente = self.uow.ingredientes.find_by_id(id)
         if not ingrediente:
             raise ValueError(f"Ingrediente {id} no existe")
         
@@ -259,10 +259,9 @@ class IngredientService:
         Returns:
             Lista de dicts con ingredientes
         """
-        ingredientes = self.uow.ingredientes.list_all(
+        ingredientes = self.uow.ingredientes.list_active(
             skip=skip,
             limit=limit,
-            search=search,
             unidad_medida=unidad_medida,
             categoria_id=categoria_id
         )
@@ -284,7 +283,7 @@ class IngredientService:
             ValueError: Si ID no existe (→ 404)
         """
         # Verificar que existe
-        ingrediente = self.uow.ingredientes.get_by_id(id)
+        ingrediente = self.uow.ingredientes.find_by_id(id)
         if not ingrediente:
             raise ValueError(f"Ingrediente {id} no existe")
         
