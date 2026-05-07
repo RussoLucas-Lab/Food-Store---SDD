@@ -61,16 +61,56 @@ class Ingrediente:
     
     @property
     def stock_disponible(self) -> int:
-        """Calcula stock disponible (stock - reservadas)"""
+        """
+        Calcula el stock disponible restando reservas.
+        
+        El stock disponible es la cantidad que realmente puede venderse,
+        considerando que parte del stock está comprometido en carritos
+        o pedidos pendientes.
+        
+        Returns:
+            int: stock_disponible = max(0, cantidad_stock - cantidad_reservada)
+        """
         return max(0, self.cantidad_stock - self.cantidad_reservada)
     
     @property
     def alerta_stock_bajo(self) -> bool:
-        """Determina si el stock está por debajo del mínimo"""
+        """
+        Determina si el stock actual está por debajo del mínimo recomendado.
+        
+        Útil para alertar al admin cuando es necesario reabastecer.
+        
+        Returns:
+            bool: True si cantidad_stock < cantidad_minima
+        """
         return self.cantidad_stock < self.cantidad_minima
     
     def puede_descontar(self, cantidad: int) -> bool:
-        """Verifica si se puede descontar la cantidad solicitada"""
+        """
+        Verifica si se puede descontar la cantidad solicitada del stock disponible.
+        
+        Antes de cualquier operación que consume stock (carrito, pedido, despacho),
+        se debe validar con este método.
+        
+        Args:
+            cantidad: Cantidad a descontar
+            
+        Returns:
+            bool: True si cantidad <= stock_disponible
+            
+        Raises:
+            ValueError: Si cantidad < 0 o ingrediente no está activo
+            
+        Ejemplos:
+            >>> ing.cantidad_stock = 100
+            >>> ing.cantidad_reservada = 30
+            >>> ing.puede_descontar(70)  # True (stock_disponible = 70)
+            True
+            >>> ing.puede_descontar(71)  # False
+            False
+            >>> ing.puede_descontar(-5)  # Raises ValueError
+            ValueError: La cantidad no puede ser negativa
+        """
         if cantidad < 0:
             raise ValueError("La cantidad no puede ser negativa")
         if not self.is_active:
