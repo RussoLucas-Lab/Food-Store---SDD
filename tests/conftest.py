@@ -6,6 +6,7 @@ import pytest
 import sys
 from unittest.mock import MagicMock
 from repositories.usuario_repository import InMemoryUsuarioRepository
+from repositories.ingrediente_repository import InMemoryIngredienteRepository
 
 # Pytest hook: runs BEFORE test collection
 def pytest_configure(config):
@@ -25,18 +26,24 @@ def pytest_configure(config):
 
 
 @pytest.fixture(autouse=True)
-def reset_usuario_repo():
+def reset_all_repos():
     """
-    Reset the usuario repository before each test.
+    Reset all repositories before each test.
     This ensures tests start with a clean state.
     """
-    # Clear the in-memory repository
+    # Clear in-memory repositories
     InMemoryUsuarioRepository._usuarios = {}
     InMemoryUsuarioRepository._id_counter = 1
+    InMemoryIngredienteRepository._ingredientes = {}
+    InMemoryIngredienteRepository._id_counter = 1
+    
     yield
+    
     # Clean up after test
     InMemoryUsuarioRepository._usuarios = {}
     InMemoryUsuarioRepository._id_counter = 1
+    InMemoryIngredienteRepository._ingredientes = {}
+    InMemoryIngredienteRepository._id_counter = 1
 
 
 @pytest.fixture(autouse=True)

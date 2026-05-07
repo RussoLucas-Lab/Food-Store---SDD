@@ -94,25 +94,25 @@
 
 ## 6. Validaciones y Seguridad
 
-- [ ] 6.1 Verificar rate limiting en POST /ingredientes (heredar de FastAPI app)
-- [ ] 6.2 Verificar JWT middleware valida token en todas las rutas protegidas
-- [ ] 6.3 Verificar @require_role("admin") rechaza non-admins con 403
-- [ ] 6.4 Verificar unicidad de nombre a nivel BD (unique constraint)
-- [ ] 6.5 Unit test: intentos de SQL injection, duplicados, access control, stock negativo
-- [ ] 6.6 Unit test: edge cases (nombre de 1 char, 100 chars, descripción vacía vs omitida, unidades inválidas)
-- [ ] 6.7 Validar que DELETE de ingrediente rechaza si está siendo usado en productos activos (o solo soft deletes)
+- [x] 6.1 Verificar rate limiting en POST /ingredientes (heredar de FastAPI app)
+- [x] 6.2 Verificar JWT middleware valida token en todas las rutas protegidas
+- [x] 6.3 Verificar @require_role("admin") rechaza non-admins con 403
+- [x] 6.4 Verificar unicidad de nombre a nivel BD (unique constraint en schema)
+- [x] 6.5 Unit test: intentos de SQL injection, duplicados, access control, stock negativo
+- [x] 6.6 Unit test: edge cases (nombre de 1 char, 100 chars, descripción vacía vs omitida, unidades inválidas)
+- [x] 6.7 Validar que DELETE de ingrediente rechaza si está siendo usado en productos activos (o solo soft deletes)
 
 ## 7. Integration Tests
 
-- [ ] 7.1 Integration test `POST /ingredientes`: crear válido → 201, inválido → 422, duplicado → 409, sin admin → 403
-- [ ] 7.2 Integration test `GET /ingredientes`: listar con skip/limit, filtros (categoria, disponibles, alerta), ordenar
-- [ ] 7.3 Integration test `GET /ingredientes/buscar`: búsqueda parcial, case-insensitive, sin resultados, query vacío → 400
-- [ ] 7.4 Integration test `GET /ingredientes/{id}`: existe → 200, no existe → 404, inactivo → 404
-- [ ] 7.5 Integration test `PUT /ingredientes/{id}`: actualizar válido → 200, duplicado → 409, sin admin → 403, registra historial
-- [ ] 7.6 Integration test `DELETE /ingredientes/{id}`: soft delete → 204, ya inactivo → 204 (idempotencia), sin admin → 403
-- [ ] 7.7 Integration test `GET /ingredientes/{id}/historial-stock`: admin solo, devuelve cambios anteriores
-- [ ] 7.8 Integration test: listado sin ingredientes → array vacío; con ingredientes → todos activos
-- [ ] 7.9 Integration test: stock_disponible se calcula correctamente con y sin reservas
+- [x] 7.1 Integration test `POST /ingredientes`: crear válido → 201, inválido → 422, duplicado → 409, sin admin → 403
+- [x] 7.2 Integration test `GET /ingredientes`: listar con skip/limit, filtros (categoria, disponibles, alerta), ordenar
+- [x] 7.3 Integration test `GET /ingredientes/buscar`: búsqueda parcial, case-insensitive, sin resultados, query vacío → 400
+- [x] 7.4 Integration test `GET /ingredientes/{id}`: existe → 200, no existe → 404, inactivo → 404
+- [x] 7.5 Integration test `PUT /ingredientes/{id}`: actualizar válido → 200, duplicado → 409, sin admin → 403, registra historial
+- [x] 7.6 Integration test `DELETE /ingredientes/{id}`: soft delete → 204, ya inactivo → 204 (idempotencia), sin admin → 403
+- [x] 7.7 Integration test `GET /ingredientes/{id}/historial-stock`: admin solo, devuelve cambios anteriores
+- [x] 7.8 Integration test: listado sin ingredientes → array vacío; con ingredientes → todos activos
+- [x] 7.9 Integration test: stock_disponible se calcula correctamente con y sin reservas
 
 ## 8. Documentación y Limpieza
 
