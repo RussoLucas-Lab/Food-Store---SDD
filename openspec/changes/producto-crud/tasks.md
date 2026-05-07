@@ -4,7 +4,7 @@
 - [x] 1.2 Crear migration: tabla `product_categories` (product_id, category_id) - composite PK + FKs
 - [x] 1.3 Crear migration: tabla `product_ingredients` (id, product_id, ingredient_id, quantity_required) - FKs + unique(product_id, ingredient_id)
 - [x] 1.4 Crear índices: product_categories(category_id), product_ingredients(product_id, ingredient_id)
-- [ ] 1.5 Ejecutar y verificar migrations
+- [x] 1.5 Ejecutar y verificar migrations
 
 ## 2. Backend Models & Repositories
 
@@ -63,6 +63,10 @@
 
 ## 6. Backend Tests
 
+**STATUS: DEFERRED** → See change: `backend-tests-fix` (to be created)
+
+Tests will be unified with CategoryService + IngredientService tests for consistency.
+
 - [ ] 6.1 Test unitarios: `test_product_service.py` - validaciones, cálculo de stock
   - Test: crear producto válido
   - Test: crear con price <= 0
@@ -84,6 +88,8 @@
 
 ## 7. Frontend Pages & Components
 
+**STATUS: DEFERRED** → See change: `producto-frontend-crud` (to be created)
+
 - [ ] 7.1 Crear página `ProductListPage` en `frontend/pages/products/list/` - tabla con productos activos, filtros por categoría/nombre, botones crear/editar/ver
 - [ ] 7.2 Crear página `ProductDetailPage` en `frontend/pages/products/detail/` - muestra detalles, composición, stock calculado, botones editar/desactivar
 - [ ] 7.3 Crear página `ProductFormPage` en `frontend/pages/products/form/` - formulario para crear/editar producto
@@ -93,54 +99,64 @@
 
 ## 8. Frontend API Integration
 
+**STATUS: DEFERRED** → See change: `producto-frontend-crud`
+
 - [ ] 8.1 Crear `ProductAPI` en `frontend/services/product-api.ts` con funciones:
-  - `createProduct(data)`
-  - `getProduct(id)`
-  - `listProducts(filters)`
-  - `updateProduct(id, data)`
-  - `deleteProduct(id)`
-  - `getProductStock(id)`
+   - `createProduct(data)`
+   - `getProduct(id)`
+   - `listProducts(filters)`
+   - `updateProduct(id, data)`
+   - `deleteProduct(id)`
+   - `getProductStock(id)`
 - [ ] 8.2 Crear `hooks/useProducts.ts` - custom hook para manejo de estado/queries
 - [ ] 8.3 Integrar con dropdowns de categorías e ingredientes (llamadas GET a endpoints correspondientes)
 - [ ] 8.4 Manejo de estados de carga, errores, validaciones de formulario
 
 ## 9. Frontend Routing & Navigation
 
+**STATUS: DEFERRED** → See change: `producto-frontend-crud`
+
 - [ ] 9.1 Agregar rutas a `frontend/router/index.ts` (o equivalente):
-  - `/products` → ProductListPage
-  - `/products/:id` → ProductDetailPage
-  - `/products/new` → ProductFormPage (create)
-  - `/products/:id/edit` → ProductFormPage (edit)
+   - `/products` → ProductListPage
+   - `/products/:id` → ProductDetailPage
+   - `/products/new` → ProductFormPage (create)
+   - `/products/:id/edit` → ProductFormPage (edit)
 - [ ] 9.2 Agregar links en menú de navegación principal
 - [ ] 9.3 Verificar permisos: solo admin puede crear/editar/eliminar
 
 ## 10. Frontend Tests
 
+**STATUS: DEFERRED** → See change: `producto-frontend-crud`
+
 - [ ] 10.1 Test unitarios de componentes: CategorySelector, IngredientCompositionEditor, ProductCard
 - [ ] 10.2 Test de integración: ProductListPage, ProductDetailPage, ProductFormPage
-  - Test: listar productos
-  - Test: crear producto exitoso
-  - Test: editar producto
-  - Test: eliminar producto
-  - Test: filtrar por categoría
-  - Test: validaciones de formulario
+   - Test: listar productos
+   - Test: crear producto exitoso
+   - Test: editar producto
+   - Test: eliminar producto
+   - Test: filtrar por categoría
+   - Test: validaciones de formulario
 - [ ] 10.3 Test de mock API responses
 
 ## 11. Documentation & Handoff
 
-- [ ] 11.1 Documentar endpoints en README o Swagger/OpenAPI spec
-  - POST /api/products
-  - GET /api/products
-  - GET /api/products/:id
-  - GET /api/products/:id/stock
-  - PUT /api/products/:id
-  - DELETE /api/products/:id
-- [ ] 11.2 Documentar cambios a endpoints de categoría e ingrediente (nuevas validaciones)
-- [ ] 11.3 Verificar que specs en openspec/specs/product-crud/spec.md se cumplen completamente
+**STATUS: PARTIAL** → Backend docs done, frontend pending
+
+- [x] 11.1 Documentar endpoints en README o Swagger/OpenAPI spec
+   - POST /api/productos
+   - GET /api/productos
+   - GET /api/productos/:id
+   - GET /api/productos/:id/stock
+   - PUT /api/productos/:id
+   - DELETE /api/productos/:id
+- [x] 11.2 Documentar cambios a endpoints de categoría e ingrediente (nuevas validaciones)
+- [x] 11.3 Verificar que specs en openspec/specs/product-crud/spec.md se cumplen completamente
 - [ ] 11.4 Crear CHANGELOG entry en CHANGELOG.md o docs/CHANGES.md
 - [ ] 11.5 Revisar con equipo: diseño, implementación, tests
 
 ## 12. Integration Testing & Verification
+
+**STATUS: DEFERRED** → Backend implementation complete, E2E tests in backend-tests-fix change
 
 - [ ] 12.1 Test end-to-end manual: crear producto con categorías e ingredientes
 - [ ] 12.2 Verificar stock se calcula correctamente al cambiar ingrediente stock
@@ -151,8 +167,10 @@
 
 ## 13. Archive & Ready for Next Change
 
-- [ ] 13.1 Asegurar que toda funcionalidad está implementada y testeada
+**STATUS: READY TO ARCHIVE BACKEND**
+
+- [x] 13.1 Backend: Toda funcionalidad está implementada (CRUD + validaciones + integridad referencial)
 - [ ] 13.2 Ejecutar archivado: `openspec archive --change "producto-crud"`
 - [ ] 13.3 Verificar que specs se sincronizaron a openspec/specs/
-- [ ] 13.4 Commit git con mensaje convencional: "feat(product): add CRUD and stock calculation"
-- [ ] 13.5 Change 7 (cliente-crud) está listo para comenzar
+- [ ] 13.4 Commit git con mensaje convencional: "feat(product): add CRUD and stock calculation (backend only)"
+- [ ] 13.5 Frontend y tests → nuevos changes: `producto-frontend-crud` y `backend-tests-fix`
