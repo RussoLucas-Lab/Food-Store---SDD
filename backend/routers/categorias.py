@@ -7,11 +7,15 @@ Proporciona 5 endpoints RESTful:
 - GET /categorias/{id} (detalle)
 - PUT /categorias/{id} (actualizar, admin-only)
 - DELETE /categorias/{id} (soft delete, admin-only)
+
+Los routers delegan la lógica de negocio a CategoryService y solo se ocupan
+de HTTP concerns: autenticación, response formatting, exception mapping.
 """
 
 from fastapi import APIRouter, HTTPException, Depends, Query
 from typing import Optional
 from uow.inmemory import InMemoryUnitOfWork
+from backend.services.categoria_service import CategoryService
 from backend.schemas.categoria_schema import (
     CategoriaCreateRequest,
     CategoriaUpdateRequest,
@@ -22,6 +26,9 @@ from backend.middleware.jwt_middleware import require_role
 
 # Instancia de UoW (en producción sería inyectada)
 uow = InMemoryUnitOfWork()
+
+# Instancia de servicio
+categoria_service = CategoryService(uow)
 
 router = APIRouter(
     prefix="/categorias",
@@ -54,21 +61,19 @@ def create_categoria(
         - 409: Nombre ya existe
     """
     try:
-        # Verificar nombre no duplicado
-        if uow.categorias.find_by_name(req.nombre):
-            raise HTTPException(
-                status_code=409,
-                detail=f"Categoría '{req.nombre}' ya existe"
-            )
-        
-        # Crear categoría
-        categoria = uow.categorias.create(req.nombre, req.descripcion or "")
-        uow.commit()
-        
-        return CategoriaResponse(**categoria.to_dict())
+        result = categoria_service.create_categoria(
+            nombre=req.nombre,
+            descripcion=req.descripcion or ""
+        )
+        return CategoriaResponse(**result)
     
     except ValueError as e:
-        raise HTTPException(status_code=409, detail=str(e))
+        error_msg = str(e)
+        # Map ValueError to appropriate HTTP status
+        if "ya existe" in error_msg:
+            raise HTTPException(status_code=409, detail=error_msg)
+        else:
+            raise HTTPException(status_code=400, detail=error_msg)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error interno: {str(e)}")
 
@@ -106,16 +111,17 @@ def list_categorias(
             from models.usuario import RoleEnum
             # Por ahora permitir - en producción verificar contra token JWT
         
-        categorias = uow.categorias.list_active(
+        items_dict = categoria_service.list_categorias(
             skip=skip,
             limit=limit,
-            sort_by=sort,
-            include_inactive=include_inactive
+            search=None
         )
         
-        total = len(uow.categorias.find_all(include_inactive=include_inactive))
+        # Obtener total de categorías
+        all_items = uow.categorias.find_all(include_inactive=include_inactive)
+        total = len(all_items)
         
-        items = [CategoriaResponse(**cat.to_dict()) for cat in categorias]
+        items = [CategoriaResponse(**item) for item in items_dict]
         
         return CategoriaListResponse(
             items=items,
@@ -143,18 +149,14 @@ def get_categoria(categoria_id: int):
         - 404: Categoría no existe o está inactiva
     """
     try:
-        categoria = uow.categorias.find_by_id(categoria_id)
-        
-        if not categoria:
-            raise HTTPException(
-                status_code=404,
-                detail=f"Categoría {categoria_id} no encontrada"
-            )
-        
-        return CategoriaResponse(**categoria.to_dict())
+        result = categoria_service.get_categoria(categoria_id)
+        return CategoriaResponse(**result)
     
-    except HTTPException:
-        raise
+    except ValueError as e:
+        error_msg = str(e)
+        if "no existe" in error_msg:
+            raise HTTPException(status_code=404, detail=error_msg)
+        raise HTTPException(status_code=400, detail=error_msg)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error interno: {str(e)}")
 
@@ -183,36 +185,21 @@ def update_categoria(
         - 409: Nombre ya existe
     """
     try:
-        # Verificar existe
-        categoria = uow.categorias.find_by_id(categoria_id)
-        if not categoria:
-            raise HTTPException(
-                status_code=404,
-                detail=f"Categoría {categoria_id} no encontrada"
-            )
-        
-        # Verificar nombre duplicado (si se cambia)
-        if req.nombre and req.nombre.lower() != categoria.nombre.lower():
-            if uow.categorias.find_by_name(req.nombre):
-                raise HTTPException(
-                    status_code=409,
-                    detail=f"Nombre '{req.nombre}' ya está en uso"
-                )
-        
-        # Actualizar
-        actualizada = uow.categorias.update(
-            categoria_id,
-            nombre=req.nombre,
-            descripcion=req.descripcion
+        result = categoria_service.update_categoria(
+            id=categoria_id,
+            nombre=req.nombre or "",
+            descripcion=req.descripcion or ""
         )
-        uow.commit()
-        
-        return CategoriaResponse(**actualizada.to_dict())
+        return CategoriaResponse(**result)
     
-    except HTTPException:
-        raise
     except ValueError as e:
-        raise HTTPException(status_code=409, detail=str(e))
+        error_msg = str(e)
+        if "no existe" in error_msg:
+            raise HTTPException(status_code=404, detail=error_msg)
+        elif "ya está en uso" in error_msg:
+            raise HTTPException(status_code=409, detail=error_msg)
+        else:
+            raise HTTPException(status_code=400, detail=error_msg)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error interno: {str(e)}")
 
@@ -243,37 +230,17 @@ def delete_categoria(
         - 409: Categoría está en uso por productos activos
     """
     try:
-        # Verificar existe
-        categoria = uow.categorias.find_by_id(categoria_id)
-        if not categoria:
-            # Intentar obtener inactiva para dar mejor error
-            if categoria_id not in uow.categorias._storage:
-                raise HTTPException(
-                    status_code=404,
-                    detail=f"Categoría {categoria_id} no encontrada"
-                )
-        
-        # NUEVO: Validar integridad - verificar que no hay productos activos
-        # Importamos aquí para evitar circular imports
-        from backend.services.product_service import ProductService
-        product_service = ProductService(uow)
-        
-        try:
-            product_service.check_can_delete_category(categoria_id)
-        except ValueError as e:
-            raise HTTPException(
-                status_code=409,
-                detail=str(e)
-            )
-        
-        # Soft delete (idempotente)
-        uow.categorias.soft_delete(categoria_id)
-        uow.commit()
-        
+        categoria_service.delete_categoria(categoria_id)
         # 204 No Content (sin body)
         return None
     
-    except HTTPException:
-        raise
+    except ValueError as e:
+        error_msg = str(e)
+        if "no existe" in error_msg:
+            raise HTTPException(status_code=404, detail=error_msg)
+        elif "en uso" in error_msg:
+            raise HTTPException(status_code=409, detail=error_msg)
+        else:
+            raise HTTPException(status_code=400, detail=error_msg)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error interno: {str(e)}")

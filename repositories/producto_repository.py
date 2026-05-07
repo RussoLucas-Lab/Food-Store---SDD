@@ -86,6 +86,16 @@ class IProductRepository(ABC):
     def find_all(self, include_inactive: bool = False) -> List[Product]:
         """Obtener todos los productos (activos o todos)"""
         pass
+    
+    @abstractmethod
+    def count_by_category(self, category_id: int) -> int:
+        """Contar productos activos que pertenecen a una categoría"""
+        pass
+    
+    @abstractmethod
+    def count_by_ingredient(self, ingredient_id: int) -> int:
+        """Contar productos activos que usan un ingrediente específico"""
+        pass
 
 
 class IProductIngredientRepository(ABC):
@@ -270,6 +280,16 @@ class InMemoryProductRepository(IProductRepository):
         if include_inactive:
             return list(self._storage.values())
         return [p for p in self._storage.values() if p.is_active()]
+    
+    def count_by_category(self, category_id: int) -> int:
+        """Contar productos activos de una categoría"""
+        # Retorna el count del set de product_ids para esta categoría
+        return len(self._category_index.get(category_id, set()))
+    
+    def count_by_ingredient(self, ingredient_id: int) -> int:
+        """Contar productos activos que usan un ingrediente"""
+        # Retorna el count del set de product_ids para este ingrediente
+        return len(self._ingredient_index.get(ingredient_id, set()))
 
 
 class InMemoryProductIngredientRepository(IProductIngredientRepository):

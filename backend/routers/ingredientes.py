@@ -9,11 +9,15 @@ Proporciona 7 endpoints RESTful:
 - PUT /ingredientes/{id} (actualizar, admin-only)
 - DELETE /ingredientes/{id} (soft delete, admin-only)
 - GET /ingredientes/{id}/historial-stock (historial, admin-only)
+
+Los routers delegan la lógica de negocio a IngredientService y solo se ocupan
+de HTTP concerns: autenticación, response formatting, exception mapping.
 """
 
 from fastapi import APIRouter, HTTPException, Depends, Query
 from typing import Optional
 from uow.inmemory import InMemoryUnitOfWork
+from backend.services.ingrediente_service import IngredientService
 from backend.schemas.ingrediente_schema import (
     IngredienteCreateRequest,
     IngredienteUpdateRequest,
@@ -25,6 +29,9 @@ from backend.middleware.jwt_middleware import require_role
 
 # Instancia de UoW (en producción sería inyectada)
 uow = InMemoryUnitOfWork()
+
+# Instancia de servicio
+ingrediente_service = IngredientService(uow)
 
 router = APIRouter(
     prefix="/ingredientes",
@@ -61,15 +68,7 @@ def create_ingrediente(
         - 409: Nombre ya existe
     """
     try:
-        # Verificar nombre no duplicado
-        if uow.ingredientes.find_by_name(req.nombre):
-            raise HTTPException(
-                status_code=409,
-                detail=f"Ingrediente '{req.nombre}' ya existe"
-            )
-        
-        # Crear ingrediente
-        ingrediente = uow.ingredientes.create(
+        result = ingrediente_service.create_ingrediente(
             nombre=req.nombre,
             unidad_medida=req.unidad_medida.value,
             cantidad_stock=req.cantidad_stock,
@@ -77,12 +76,14 @@ def create_ingrediente(
             descripcion=req.descripcion or "",
             categoria_id=req.categoria_id
         )
-        uow.commit()
-        
-        return IngredienteResponse(**ingrediente.to_dict())
+        return IngredienteResponse(**result)
     
     except ValueError as e:
-        raise HTTPException(status_code=409, detail=str(e))
+        error_msg = str(e)
+        if "ya existe" in error_msg:
+            raise HTTPException(status_code=409, detail=error_msg)
+        else:
+            raise HTTPException(status_code=400, detail=error_msg)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error interno: {str(e)}")
 
@@ -122,22 +123,20 @@ def list_ingredientes(
                     detail=f"unidad_medida inválida. Válidas: {', '.join([u.value for u in UnidadMedidaEnum])}"
                 )
         
-        ingredientes = uow.ingredientes.list_active(
+        items_dict = ingrediente_service.list_ingredientes(
             skip=skip,
             limit=limit,
-            categoria_id=categoria_id,
-            disponibles_solo=disponibles_solo,
-            alerta_stock_bajo=alerta_stock_bajo,
+            search=None,
             unidad_medida=unidad_medida,
-            ordenar_por=ordenar_por,
-            orden=orden
+            categoria_id=categoria_id
         )
         
         # Calcular total
-        total = len(uow.ingredientes.find_all(include_inactive=False))
+        all_items = uow.ingredientes.find_all(include_inactive=False)
+        total = len(all_items)
         
         return IngredienteListResponse(
-            ingredientes=[IngredienteResponse(**i.to_dict()) for i in ingredientes],
+            ingredientes=[IngredienteResponse(**i) for i in items_dict],
             total=total,
             skip=skip,
             limit=limit
@@ -171,11 +170,15 @@ def buscar_ingredientes(
         - 400: Parámetro q requerido
     """
     try:
-        ingredientes = uow.ingredientes.buscar_por_nombre(q, skip=skip, limit=limit)
+        items_dict = ingrediente_service.list_ingredientes(
+            skip=skip,
+            limit=limit,
+            search=q
+        )
         
         return IngredienteListResponse(
-            ingredientes=[IngredienteResponse(**i.to_dict()) for i in ingredientes],
-            total=len(ingredientes),
+            ingredientes=[IngredienteResponse(**i) for i in items_dict],
+            total=len(items_dict),
             skip=skip,
             limit=limit
         )
@@ -202,17 +205,14 @@ def get_ingrediente(
         - 404: Ingrediente no encontrado o inactivo
     """
     try:
-        ingrediente = uow.ingredientes.find_by_id(ingrediente_id)
-        if not ingrediente:
-            raise HTTPException(
-                status_code=404,
-                detail="Ingrediente no encontrado"
-            )
-        
-        return IngredienteResponse(**ingrediente.to_dict())
+        result = ingrediente_service.get_ingrediente(ingrediente_id)
+        return IngredienteResponse(**result)
     
-    except HTTPException:
-        raise
+    except ValueError as e:
+        error_msg = str(e)
+        if "no existe" in error_msg:
+            raise HTTPException(status_code=404, detail=error_msg)
+        raise HTTPException(status_code=400, detail=error_msg)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error interno: {str(e)}")
 
@@ -240,37 +240,24 @@ def update_ingrediente(
         - 403: Usuario no autorizado (no es admin)
     """
     try:
-        ingrediente = uow.ingredientes.find_by_id(ingrediente_id)
-        if not ingrediente:
-            raise HTTPException(
-                status_code=404,
-                detail="Ingrediente no encontrado"
-            )
-        
-        # Verificar nombre no duplicado si se cambia
-        if req.nombre and req.nombre.lower() != ingrediente.nombre.lower():
-            if uow.ingredientes.find_by_name(req.nombre):
-                raise HTTPException(
-                    status_code=409,
-                    detail=f"Ingrediente '{req.nombre}' ya existe"
-                )
-        
-        # Actualizar
-        actualizado = uow.ingredientes.update(
-            ingrediente_id,
+        result = ingrediente_service.update_ingrediente(
+            id=ingrediente_id,
             nombre=req.nombre,
-            descripcion=req.descripcion,
+            unidad_medida=req.unidad_medida.value if req.unidad_medida else None,
             cantidad_stock=req.cantidad_stock,
-            cantidad_minima=req.cantidad_minima
+            cantidad_minima=req.cantidad_minima,
+            descripcion=req.descripcion
         )
-        
-        uow.commit()
-        return IngredienteResponse(**actualizado.to_dict())
+        return IngredienteResponse(**result)
     
-    except HTTPException:
-        raise
     except ValueError as e:
-        raise HTTPException(status_code=409, detail=str(e))
+        error_msg = str(e)
+        if "no existe" in error_msg:
+            raise HTTPException(status_code=404, detail=error_msg)
+        elif "ya está en uso" in error_msg or "ya existe" in error_msg:
+            raise HTTPException(status_code=409, detail=error_msg)
+        else:
+            raise HTTPException(status_code=400, detail=error_msg)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error interno: {str(e)}")
 
@@ -301,30 +288,17 @@ def delete_ingrediente(
         - 409: Ingrediente está en uso por productos activos
     """
     try:
-        # NUEVO: Validar integridad - verificar que no hay productos activos
-        from backend.services.product_service import ProductService
-        product_service = ProductService(uow)
-        
-        try:
-            product_service.check_can_delete_ingredient(ingrediente_id)
-        except ValueError as e:
-            raise HTTPException(
-                status_code=409,
-                detail=str(e)
-            )
-        
-        result = uow.ingredientes.soft_delete(ingrediente_id)
-        if not result:
-            raise HTTPException(
-                status_code=404,
-                detail="Ingrediente no encontrado"
-            )
-        
-        uow.commit()
+        ingrediente_service.delete_ingrediente(ingrediente_id)
         return None
     
-    except HTTPException:
-        raise
+    except ValueError as e:
+        error_msg = str(e)
+        if "no existe" in error_msg:
+            raise HTTPException(status_code=404, detail=error_msg)
+        elif "en uso" in error_msg:
+            raise HTTPException(status_code=409, detail=error_msg)
+        else:
+            raise HTTPException(status_code=400, detail=error_msg)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error interno: {str(e)}")
 
@@ -352,21 +326,18 @@ def get_historial_stock(
         - 403: Usuario no autorizado (no es admin)
     """
     try:
-        ingrediente = uow.ingredientes.find_by_id(ingrediente_id)
-        if not ingrediente:
-            raise HTTPException(
-                status_code=404,
-                detail="Ingrediente no encontrado"
-            )
+        history = ingrediente_service.get_stock_history(ingrediente_id)
         
-        # TODO: Implementar consulta a tabla stock_history
         return {
             "ingrediente_id": ingrediente_id,
-            "historial": [],
-            "total": 0
+            "historial": history,
+            "total": len(history)
         }
     
-    except HTTPException:
-        raise
+    except ValueError as e:
+        error_msg = str(e)
+        if "no existe" in error_msg:
+            raise HTTPException(status_code=404, detail=error_msg)
+        raise HTTPException(status_code=400, detail=error_msg)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error interno: {str(e)}")
