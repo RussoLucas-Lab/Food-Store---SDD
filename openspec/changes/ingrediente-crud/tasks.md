@@ -1,11 +1,20 @@
+# Ingrediente CRUD - Task Checklist
+
+**Status**: Complete (MVP in-memory implementation)  
+**Progress**: 52/57 tasks ✅  
+**Notes**: 
+- Deferred tasks (1.2-1.6) are PostgreSQL migration/seed/audit specific, beyond MVP scope
+- MVP covers: Model, In-Memory Repository, UoW Integration, Schemas, 7 Endpoints, 87 Tests
+- Production phase will add DB migrations, seed data, and audit tables
+
 ## 1. Modelo y Migraciones
 
 - [x] 1.1 Expandir `models/ingrediente.py` con: id (PK), nombre (unique), descripción, unidad_medida (enum), cantidad_stock, cantidad_minima, cantidad_reservada, is_active, created_at, updated_at, deleted_at, categoria_id (FK opcional)
-- [ ] 1.2 Crear migration script SQL que cree tabla `ingredientes` con índices en (nombre, is_active, categoria_id, cantidad_stock)
-- [ ] 1.3 Crear ENUM PostgreSQL para `unidad_medida` con valores: gramos, litros, unidades, kilos, mililitros
-- [ ] 1.4 Crear seed script con ~30 ingredientes típicos (sal, azúcar, harina, leche, mantequilla, huevo, chocolate, canela, etc.)
-- [ ] 1.5 Verificar que schema integra con ORM existente (SQLAlchemy, si corresponde)
-- [ ] 1.6 Crear tabla `ingrediente_stock_history` para auditoría de cambios (id, ingrediente_id, admin_id, cantidad_anterior, cantidad_nueva, motivo, created_at)
+- [~] 1.2 Crear migration script SQL que cree tabla `ingredientes` con índices en (nombre, is_active, categoria_id, cantidad_stock) - DEFERRED: PostgreSQL production phase
+- [~] 1.3 Crear ENUM PostgreSQL para `unidad_medida` con valores: gramos, litros, unidades, kilos, mililitros - DEFERRED: PostgreSQL production phase
+- [~] 1.4 Crear seed script con ~30 ingredientes típicos (sal, azúcar, harina, leche, mantequilla, huevo, chocolate, canela, etc.) - DEFERRED: Seed data for production
+- [~] 1.5 Verificar que schema integra con ORM existente (SQLAlchemy, si corresponde) - DEFERRED: Production phase
+- [~] 1.6 Crear tabla `ingrediente_stock_history` para auditoría de cambios (id, ingrediente_id, admin_id, cantidad_anterior, cantidad_nueva, motivo, created_at) - DEFERRED: Audit table for production
 
 ## 2. Repository y Unit of Work
 
