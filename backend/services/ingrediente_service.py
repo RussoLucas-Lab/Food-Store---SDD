@@ -232,7 +232,7 @@ class IngredientService:
         Raises:
             ValueError: Si ID no existe (→ 404)
         """
-        ingrediente = self.uow.ingredientes.get_by_id(id)
+        ingrediente = self.uow.ingredientes.find_by_id(id)
         if not ingrediente:
             raise ValueError(f"Ingrediente {id} no existe")
         

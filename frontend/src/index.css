@@ -1,0 +1,43 @@
+/* Base styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  --color-primary: #2563eb;
+  --color-danger: #dc2626;
+  --color-success: #16a34a;
+  --color-bg-light: #ffffff;
+  --color-bg-dark: #1f2937;
+  --color-text-light: #000000;
+  --color-text-dark: #ffffff;
+}
+
+html[data-theme='dark'] {
+  --color-bg-light: #1f2937;
+  --color-text-light: #ffffff;
+}
+
+body {
+  font-family: system-ui, -apple-system, sans-serif;
+  color: var(--color-text-light);
+  background-color: var(--color-bg-light);
+  line-height: 1.6;
+}
+
+a {
+  color: var(--color-primary);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+button:focus,
+input:focus {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}

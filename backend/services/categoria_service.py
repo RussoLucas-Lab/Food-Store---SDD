@@ -152,9 +152,15 @@ class CategoryService:
         self.uow.categorias.soft_delete(id)
         self.uow.commit()
         
-        # Retornar el objeto actualizado
-        categoria = self.uow.categorias._storage.get(id)  # Acceso directo para dev
-        return categoria.to_dict()
+        # Retornar el objeto como inactivo
+        return {
+            "id": id,
+            "nombre": categoria.nombre,
+            "descripcion": getattr(categoria, "descripcion", ""),
+            "status": "inactive",
+            "created_at": getattr(categoria, "created_at", None),
+            "updated_at": getattr(categoria, "updated_at", None)
+        }
     
     def get_categoria(self, id: int) -> Dict:
         """

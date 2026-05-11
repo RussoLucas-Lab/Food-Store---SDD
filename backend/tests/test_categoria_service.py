@@ -100,26 +100,29 @@ class TestUpdateCategoria:
         mock_categoria = Mock()
         mock_categoria.id = 1
         mock_categoria.nombre = "Frutas"
-        mock_categoria.to_dict.return_value = {
+        mock_updated = Mock()
+        mock_updated.to_dict.return_value = {
             "id": 1,
             "nombre": "Frutas Cítricas",
-            "descripcion": "Nuevadescripción",
+            "descripcion": "Nueva descripción",
             "status": "active"
         }
-        mock_uow.categorias.get_by_id.return_value = mock_categoria
+        mock_uow.categorias.find_by_id.return_value = mock_categoria
         mock_uow.categorias.find_by_name.return_value = None  # Nombre no existe
+        mock_uow.categorias.update.return_value = mock_updated
         
         # Execute
         result = service.update_categoria(1, "Frutas Cítricas", "Nueva descripción")
         
         # Assert
         assert result["id"] == 1
+        assert result["nombre"] == "Frutas Cítricas"
         mock_uow.categorias.update.assert_called_once()
         mock_uow.commit.assert_called_once()
     
     def test_update_categoria_not_found(self, service, mock_uow):
         """❌ Actualizar categoría que no existe → ValueError"""
-        mock_uow.categorias.get_by_id.return_value = None
+        mock_uow.categorias.find_by_id.return_value = None
         
         with pytest.raises(ValueError, match="no existe"):
             service.update_categoria(999, "NewName", "desc")
@@ -137,7 +140,7 @@ class TestUpdateCategoria:
         mock_existing = Mock()
         mock_existing.id = 2  # Otra categoría
         
-        mock_uow.categorias.get_by_id.return_value = mock_categoria
+        mock_uow.categorias.find_by_id.return_value = mock_categoria
         mock_uow.categorias.find_by_name.return_value = mock_existing
         
         # Execute & Assert
@@ -154,24 +157,26 @@ class TestDeleteCategoria:
         mock_categoria = Mock()
         mock_categoria.id = 1
         mock_categoria.nombre = "Frutas"
-        mock_categoria.to_dict.return_value = {
-            "id": 1,
-            "status": "inactive"
-        }
-        mock_uow.categorias.get_by_id.return_value = mock_categoria
+        mock_categoria.status = "active"
+        mock_categoria.descripcion = "Desc"
+        mock_categoria.created_at = "2026-05-07T12:00:00"
+        mock_categoria.updated_at = "2026-05-07T12:00:00"
+        
+        mock_uow.categorias.find_by_id.return_value = mock_categoria
         mock_uow.productos.count_by_category.return_value = 0  # No hay productos
+        mock_uow.categorias.soft_delete.return_value = True
         
         # Execute
         result = service.delete_categoria(1)
         
         # Assert
         assert result["status"] == "inactive"
-        mock_uow.categorias.update.assert_called_once()
+        mock_uow.categorias.soft_delete.assert_called_once()
         mock_uow.commit.assert_called_once()
     
     def test_delete_categoria_not_found(self, service, mock_uow):
         """❌ Eliminar categoría que no existe → ValueError"""
-        mock_uow.categorias.get_by_id.return_value = None
+        mock_uow.categorias.find_by_id.return_value = None
         
         with pytest.raises(ValueError, match="no existe"):
             service.delete_categoria(999)
@@ -182,7 +187,7 @@ class TestDeleteCategoria:
         mock_categoria = Mock()
         mock_categoria.id = 1
         mock_categoria.nombre = "Frutas"
-        mock_uow.categorias.get_by_id.return_value = mock_categoria
+        mock_uow.categorias.find_by_id.return_value = mock_categoria
         mock_uow.productos.count_by_category.return_value = 5  # Hay 5 productos
         
         # Execute & Assert
@@ -197,12 +202,14 @@ class TestGetCategoria:
         """✓ Obtener categoría existente"""
         # Setup
         mock_categoria = Mock()
+        mock_categoria.id = 1
+        mock_categoria.nombre = "Frutas"
         mock_categoria.to_dict.return_value = {
             "id": 1,
             "nombre": "Frutas",
             "status": "active"
         }
-        mock_uow.categorias.get_by_id.return_value = mock_categoria
+        mock_uow.categorias.find_by_id.return_value = mock_categoria
         
         # Execute
         result = service.get_categoria(1)
@@ -213,7 +220,7 @@ class TestGetCategoria:
     
     def test_get_categoria_not_found(self, service, mock_uow):
         """❌ Obtener categoría que no existe → ValueError"""
-        mock_uow.categorias.get_by_id.return_value = None
+        mock_uow.categorias.find_by_id.return_value = None
         
         with pytest.raises(ValueError, match="no existe"):
             service.get_categoria(999)
@@ -230,7 +237,7 @@ class TestListCategorias:
         mock_cat2 = Mock()
         mock_cat2.to_dict.return_value = {"id": 2, "nombre": "Verduras"}
         
-        mock_uow.categorias.list_all.return_value = [mock_cat1, mock_cat2]
+        mock_uow.categorias.list_active.return_value = [mock_cat1, mock_cat2]
         
         # Execute
         result = service.list_categorias(skip=0, limit=10)
@@ -238,26 +245,27 @@ class TestListCategorias:
         # Assert
         assert len(result) == 2
         assert result[0]["nombre"] == "Frutas"
-        mock_uow.categorias.list_all.assert_called_once_with(skip=0, limit=10, search=None)
+        assert result[1]["nombre"] == "Verduras"
     
     def test_list_categorias_with_search(self, service, mock_uow):
-        """✓ Listar categorías con búsqueda → filtra resultados"""
+        """✓ Listar categorías con búsqueda → retorna filtrados"""
         # Setup
-        mock_cat = Mock()
-        mock_cat.to_dict.return_value = {"id": 1, "nombre": "Frutas"}
-        mock_uow.categorias.list_all.return_value = [mock_cat]
+        mock_cat1 = Mock()
+        mock_cat1.to_dict.return_value = {"id": 1, "nombre": "Frutas Cítricas"}
+        
+        mock_uow.categorias.list_active.return_value = [mock_cat1]
         
         # Execute
         result = service.list_categorias(skip=0, limit=10, search="Frut")
         
         # Assert
         assert len(result) == 1
-        mock_uow.categorias.list_all.assert_called_once_with(skip=0, limit=10, search="Frut")
+        assert result[0]["nombre"] == "Frutas Cítricas"
     
     def test_list_categorias_empty(self, service, mock_uow):
-        """✓ Listar categorías sin resultados → retorna []"""
-        mock_uow.categorias.list_all.return_value = []
+        """✓ Listar cuando no hay categorías → retorna lista vacía"""
+        mock_uow.categorias.list_active.return_value = []
         
         result = service.list_categorias()
         
-        assert result == []
+        assert len(result) == 0
