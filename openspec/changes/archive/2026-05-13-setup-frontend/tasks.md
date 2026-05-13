@@ -111,15 +111,15 @@
 - [x] 13.1 Run `npm run build` and verify no errors; check dist/ output
 - [x] 13.2 Run `npm run test` and verify test infrastructure works (at least 2-3 sample tests pass)
 - [x] 13.3 Run `npm run lint` and fix any linting errors
-- [ ] 13.4 Verify `npm run dev` starts server with HMR working
-- [ ] 13.5 Manual test: reload page, verify auth persists; toggle theme, verify change persists
-- [ ] 13.6 Manual test: navigate to protected route without auth, verify redirect to login
-- [ ] 13.7 Create basic integration test: login flow (if auth endpoint available)
+- [x] 13.4 Verify `npm run dev` starts server with HMR working
+- [x] 13.5 Manual test: reload page, verify auth persists; toggle theme, verify change persists
+- [x] 13.6 Manual test: navigate to protected route without auth, verify redirect to login
+- [x] 13.7 Create basic integration test: login flow (if auth endpoint available)
 
 ## 14. Final Polish
 
-- [ ] 14.1 Update project README.md with frontend setup instructions
-- [ ] 14.2 Add CONTRIBUTING.md for frontend contribution guidelines
-- [ ] 14.3 Create git hooks (pre-commit: lint, pre-push: test)
-- [ ] 14.4 Verify all npm scripts work (dev, build, test, lint, preview)
-- [ ] 14.5 Document edge cases in FRONTEND_TROUBLESHOOTING.md
+- [x] 14.1 Update project README.md with frontend setup instructions
+- [x] 14.2 Add CONTRIBUTING.md for frontend contribution guidelines
+- [x] 14.3 Create git hooks (pre-commit: lint, pre-push: test)
+- [x] 14.4 Verify all npm scripts work (dev, build, test, lint, preview)
+- [x] 14.5 Document edge cases in FRONTEND_TROUBLESHOOTING.md

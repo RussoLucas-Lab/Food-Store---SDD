@@ -1,11 +1,9 @@
 import { httpClient, handleApiError, withRetry } from '../../../shared/services/httpClient';
 import {
-  Cliente,
   ClienteCreate,
   ClienteUpdate,
   ClienteResponse,
   ClienteListResponse,
-  ApiError,
 } from '../../../shared/types';
 
 const API_ENDPOINT = '/clientes';

@@ -23,7 +23,7 @@ export const ClienteSearch: React.FC<ClienteSearchProps> = ({
   debounceMs = 300,
 }) => {
   const [query, setQuery] = useState('');
-  const [debounceTimer, setDebounceTimer] = useState<NodeJS.Timeout | null>(null);
+  const [debounceTimer, setDebounceTimer] = useState<ReturnType<typeof setTimeout> | null>(null);
 
   /**
    * Debounced search: wait for user to stop typing before triggering search

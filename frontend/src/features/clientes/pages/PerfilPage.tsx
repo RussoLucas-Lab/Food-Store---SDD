@@ -43,9 +43,9 @@ export const PerfilPage: React.FC = () => {
       if (response.items && response.items.length > 0) {
         setCliente(response.items[0]);
       }
-    } catch (error) {
-      // It's ok if there's no profile yet
-      console.warn('No cliente profile found for user');
+    } catch {
+       // It's ok if there's no profile yet
+       console.warn('No cliente profile found for user');
     } finally {
       viewState.setListLoading(false);
     }

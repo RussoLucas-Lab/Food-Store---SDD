@@ -16,13 +16,12 @@ import './ClientesPage.css';
  * - Search: admin-only feature
  */
 export const ClientesPage: React.FC = () => {
-  const navigate = useNavigate();
-  const { hasRole, user } = useAuth();
-  const isAdmin = hasRole('ADMIN');
+   const navigate = useNavigate();
+   const { hasRole } = useAuth();
+   const isAdmin = hasRole('ADMIN');
 
-  const listState = useClienteList();
-  const [searchQuery, setSearchQuery] = useState('');
-  const [isSearching, setIsSearching] = useState(false);
+   const listState = useClienteList();
+   const [searchQuery, setSearchQuery] = useState('');
 
   /**
    * Load clientes on mount or when search changes
@@ -39,19 +38,17 @@ export const ClientesPage: React.FC = () => {
       let response;
 
       if (searchQuery && isAdmin) {
-        // Search mode
-        setIsSearching(true);
-        const results = await ClienteService.searchClientes(searchQuery);
-        response = {
-          items: results,
-          total: results.length,
-          page: 1,
-          limit: results.length,
-        };
-      } else {
-        // List all
-        setIsSearching(false);
-        response = await ClienteService.listClientes(1, 50);
+         // Search mode
+         const results = await ClienteService.searchClientes(searchQuery);
+         response = {
+           items: results,
+           total: results.length,
+           page: 1,
+           limit: results.length,
+         };
+       } else {
+         // List all
+         response = await ClienteService.listClientes(1, 50);
       }
 
       listState.setListItems(response.items);

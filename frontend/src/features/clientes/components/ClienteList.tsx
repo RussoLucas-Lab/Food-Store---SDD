@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Cliente } from '../../../shared/types';
 import { useAuth } from '../../../shared/context/AuthContext';
 import { Button } from '../../../shared/components/atoms';
