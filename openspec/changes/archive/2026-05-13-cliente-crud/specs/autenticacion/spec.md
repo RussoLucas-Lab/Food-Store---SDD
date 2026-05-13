@@ -1,7 +1,7 @@
-## MODIFIED Requirements
+## ADDED Requirements
 
 ### Requirement: Role-based access control for client endpoints
-Endpoints that manage client data (POST, PATCH, DELETE /clientes) require authentication and role validation. ADMIN role can perform all operations; USER role can only access their own client profile (GET and PATCH on own ID); GUEST has no access.
+Endpoints that manage client data (POST, PATCH, DELETE /clientes) SHALL require authentication and role validation. ADMIN role SHALL be able to perform all operations; USER role SHALL only access their own client profile (GET and PATCH on own ID); GUEST SHALL have no access.
 
 #### Scenario: Admin token grants full access
 - **WHEN** authenticated request contains valid JWT with ADMIN role
