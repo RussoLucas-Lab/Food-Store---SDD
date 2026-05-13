@@ -1,1 +1,1 @@
-﻿// Placeholder for services exports
+﻿export { ClienteService } from './clienteService';

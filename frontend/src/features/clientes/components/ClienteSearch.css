@@ -1,0 +1,50 @@
+/* ClienteSearch Component Styles */
+
+.cliente-search {
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  background-color: #f8f9fa;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.cliente-search__container {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.cliente-search__input {
+  flex: 1;
+  min-width: 200px;
+}
+
+.cliente-search__clear {
+  padding: 0.5rem 0.75rem;
+  font-size: 1.2rem;
+  line-height: 1;
+  min-width: 44px;
+}
+
+.cliente-search__status {
+  margin-top: 0.5rem;
+  font-size: 0.85rem;
+  color: #666;
+  text-align: right;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .cliente-search {
+    margin-bottom: 1rem;
+    padding: 0.75rem;
+  }
+
+  .cliente-search__container {
+    flex-wrap: wrap;
+  }
+
+  .cliente-search__input {
+    min-width: 100%;
+  }
+}

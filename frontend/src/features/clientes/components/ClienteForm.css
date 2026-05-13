@@ -1,0 +1,70 @@
+/* ClienteForm Component Styles */
+
+.cliente-form {
+  background-color: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 2rem;
+  max-width: 600px;
+}
+
+.cliente-form--loading {
+  padding: 2rem;
+  text-align: center;
+  background-color: #f9f9f9;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.cliente-form__error {
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+  background-color: #f8d7da;
+  border: 1px solid #f5c6cb;
+  border-radius: 4px;
+  color: #721c24;
+  font-size: 0.95rem;
+}
+
+.cliente-form__group {
+  margin-bottom: 1.5rem;
+}
+
+.cliente-form__group:last-of-type {
+  margin-bottom: 2rem;
+}
+
+.cliente-form__actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+  padding-top: 1rem;
+  border-top: 1px solid #ddd;
+}
+
+.cliente-form__submit {
+  flex: 1;
+  max-width: 200px;
+}
+
+.cliente-form__cancel {
+  min-width: 120px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .cliente-form {
+    padding: 1.5rem;
+    max-width: 100%;
+  }
+
+  .cliente-form__actions {
+    flex-direction: column;
+  }
+
+  .cliente-form__submit,
+  .cliente-form__cancel {
+    width: 100%;
+    max-width: none;
+  }
+}

@@ -2,6 +2,12 @@ import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate, Outlet } from 'react-router-dom';
 import { useAuth } from '@/shared/context/AuthContext';
 import { Layout } from '@/shared/components/organisms';
+import {
+  ClientesPage,
+  ClienteCreatePage,
+  ClienteDetailPage,
+  PerfilPage,
+} from '@/features/clientes/pages';
 
 /**
  * ProtectedRoute: Wrapper that checks authentication and role
@@ -52,8 +58,13 @@ export const AppRouter: React.FC = () => {
         <Route element={<LayoutRoute />}>
           <Route element={<ProtectedRoute />}>
             <Route path="/profile" element={<ProfilePage />} />
+            <Route path="/perfil" element={<PerfilPage />} />
             <Route path="/productos/*" element={<ProductosLayout />} />
-            <Route path="/clientes/*" element={<ClientesLayout />} />
+            {/* Clientes routes */}
+            <Route path="/clientes" element={<ClientesPage />} />
+            <Route path="/clientes/crear" element={<ClienteCreatePage />} />
+            <Route path="/clientes/:id" element={<ClienteDetailPage />} />
+            <Route path="/clientes/:id/editar" element={<ClienteDetailPage />} />
           </Route>
 
           {/* Admin routes */}
@@ -77,7 +88,6 @@ const RegisterPage: React.FC = () => <div className="p-8"><h1>Register</h1></div
 const AboutPage: React.FC = () => <div className="p-8"><h1>About</h1></div>;
 const ProfilePage: React.FC = () => <div className="p-8"><h1>Your Profile</h1></div>;
 const ProductosLayout: React.FC = () => <Outlet />;
-const ClientesLayout: React.FC = () => <Outlet />;
 const AdminLayout: React.FC = () => <Outlet />;
 const UnauthorizedPage: React.FC = () => (
   <div className="p-8 text-center">
