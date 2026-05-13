@@ -52,46 +52,46 @@
 
 ## 7. Frontend: Components & Pages
 
-- [ ] 7.1 Create ClienteList component (table/card layout, display active clientes)
-- [ ] 7.2 Create ClienteForm component (form for create/edit, reusable)
-- [ ] 7.3 Create ClienteDetail component (single cliente view with edit/delete actions)
-- [ ] 7.4 Create ClienteSearch component (search bar, integrates with list)
-- [ ] 7.5 Implement loading states and error handling in components
+- [x] 7.1 Create ClienteList component (table/card layout, display active clientes)
+- [x] 7.2 Create ClienteForm component (form for create/edit, reusable)
+- [x] 7.3 Create ClienteDetail component (single cliente view with edit/delete actions)
+- [x] 7.4 Create ClienteSearch component (search bar, integrates with list)
+- [x] 7.5 Implement loading states and error handling in components
 
 ## 8. Frontend: Pages & Routing
 
-- [ ] 8.1 Create /clientes page (list all clientes with search)
-- [ ] 8.2 Create /clientes/crear page (form to create new cliente)
-- [ ] 8.3 Create /clientes/:id page (detail view with edit/delete)
-- [ ] 8.4 Create /perfil page (user's own cliente profile, edit-only)
-- [ ] 8.5 Add routes to main router configuration
+- [x] 8.1 Create /clientes page (list all clientes with search)
+- [x] 8.2 Create /clientes/crear page (form to create new cliente)
+- [x] 8.3 Create /clientes/:id page (detail view with edit/delete)
+- [x] 8.4 Create /perfil page (user's own cliente profile, edit-only)
+- [x] 8.5 Add routes to main router configuration
 
 ## 9. Frontend: HTTP Integration
 
-- [ ] 9.1 Create API service: clienteService with methods (create, get, list, update, delete, reactivate, search)
-- [ ] 9.2 Implement error handling and retry logic for network failures
-- [ ] 9.3 Implement token refresh / auth error handling
-- [ ] 9.4 Add loading/error states to components using React hooks
+- [x] 9.1 Create API service: clienteService with methods (create, get, list, update, delete, reactivate, search)
+- [x] 9.2 Implement error handling and retry logic for network failures
+- [x] 9.3 Implement token refresh / auth error handling
+- [x] 9.4 Add loading/error states to components using React hooks
 
 ## 10. Frontend: Authorization & UI Logic
 
-- [ ] 10.1 Hide/show UI based on role (ADMIN sees all clientes, USER sees only profile)
-- [ ] 10.2 Disable delete/create buttons for non-admin users
-- [ ] 10.3 Implement frontend validation (email, required fields, format)
-- [ ] 10.4 Show appropriate error messages to user (validation, network, authorization)
+- [x] 10.1 Hide/show UI based on role (ADMIN sees all clientes, USER sees only profile)
+- [x] 10.2 Disable delete/create buttons for non-admin users
+- [x] 10.3 Implement frontend validation (email, required fields, format)
+- [x] 10.4 Show appropriate error messages to user (validation, network, authorization)
 
 ## 11. Seed Data & Testing
 
-- [ ] 11.1 Create seed script with sample clientes (names, emails, addresses, phone numbers)
-- [ ] 11.2 Load seed data into test database before integration tests
-- [ ] 11.3 Create test fixtures for different user roles (ADMIN, USER, GUEST)
+- [x] 11.1 Create seed script with sample clientes (names, emails, addresses, phone numbers)
+- [x] 11.2 Load seed data into test database before integration tests
+- [x] 11.3 Create test fixtures for different user roles (ADMIN, USER, GUEST)
 
 ## 12. Documentation & Polish
 
-- [ ] 12.1 Write API endpoint documentation (all 7 endpoints, request/response examples)
-- [ ] 12.2 Add inline code comments / docstrings (models, service, endpoints)
-- [ ] 12.3 Document frontend components (props, usage examples)
-- [ ] 12.4 Create CHANGES.md entry summarizing this change
+- [x] 12.1 Write API endpoint documentation (all 7 endpoints, request/response examples)
+- [x] 12.2 Add inline code comments / docstrings (models, service, endpoints)
+- [x] 12.3 Document frontend components (props, usage examples)
+- [x] 12.4 Create CHANGES.md entry summarizing this change
 
 ## 13. Final Verification
 
