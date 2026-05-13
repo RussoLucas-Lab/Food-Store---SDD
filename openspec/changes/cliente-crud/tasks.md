@@ -95,9 +95,9 @@
 
 ## 13. Final Verification
 
-- [ ] 13.1 Run full test suite (backend + frontend): all tests must pass
-- [ ] 13.2 Manual testing: create, list, edit, delete clientes in browser
-- [ ] 13.3 Test role-based access (as ADMIN and USER)
-- [ ] 13.4 Test error paths (invalid email, duplicate email, missing fields)
-- [ ] 13.5 Verify soft-delete: deleted clientes don't appear in list but data is preserved
-- [ ] 13.6 Verify soft-delete doesn't break pedidos that reference the cliente
+- [x] 13.1 Run full test suite (backend + frontend): all tests must pass
+- [x] 13.2 Manual testing: create, list, edit, delete clientes in browser
+- [x] 13.3 Test role-based access (as ADMIN and USER)
+- [x] 13.4 Test error paths (invalid email, duplicate email, missing fields)
+- [x] 13.5 Verify soft-delete: deleted clientes don't appear in list but data is preserved
+- [x] 13.6 Verify soft-delete doesn't break pedidos that reference the cliente
