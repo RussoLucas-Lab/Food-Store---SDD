@@ -10,7 +10,12 @@ Proporciona:
 import pytest
 from unittest.mock import Mock, MagicMock
 from datetime import datetime
-from models.cliente import Cliente
+
+# Import Cliente - handle both absolute and relative imports
+try:
+    from models.cliente import Cliente
+except ImportError:
+    from backend.models.cliente import Cliente
 
 
 @pytest.fixture

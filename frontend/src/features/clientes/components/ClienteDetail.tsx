@@ -1,7 +1,7 @@
 import React from 'react';
-import { Cliente } from '../../../../shared/types';
-import { useAuth } from '../../../../shared/context/AuthContext';
-import Button from '../../../../shared/components/atoms/Button';
+import { Cliente } from '../../../shared/types';
+import { useAuth } from '../../../shared/context/AuthContext';
+import { Button } from '../../../shared/components/atoms';
 import './ClienteDetail.css';
 
 interface ClienteDetailProps {

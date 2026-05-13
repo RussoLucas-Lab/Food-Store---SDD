@@ -1,6 +1,5 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import Input from '../../../../shared/components/atoms/Input';
-import Button from '../../../../shared/components/atoms/Button';
+import { Input, Button } from '../../../shared/components/atoms';
 import './ClienteSearch.css';
 
 interface ClienteSearchProps {

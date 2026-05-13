@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../shared/context/AuthContext';
 import { ClienteService } from '../services/clienteService';
 import { ClienteList, ClienteSearch } from '../components';
-import Button from '../../../shared/components/atoms/Button';
+import { Button } from '../../../shared/components/atoms';
 import { useClienteList } from '../hooks';
 import { Cliente } from '../../../shared/types';
 import './ClientesPage.css';

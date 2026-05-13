@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { Cliente, ClienteCreate, ClienteUpdate } from '../../../../shared/types';
-import FormField from '../../../../shared/components/molecules/FormField';
-import Button from '../../../../shared/components/atoms/Button';
+import { Cliente, ClienteCreate, ClienteUpdate } from '../../../shared/types';
+import { FormField } from '../../../shared/components/molecules';
+import { Button } from '../../../shared/components/atoms';
 import './ClienteForm.css';
 
 interface ClienteFormProps {
