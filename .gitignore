@@ -36,3 +36,9 @@ Thumbs.db
 # Logs
 *.log
 logs/
+
+# Engram (AI memory system)
+# Track chunks but ignore DB cache
+.engram/
+!.engram/chunks/
+!.engram/chunks/**
