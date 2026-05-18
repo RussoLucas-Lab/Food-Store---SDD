@@ -2,10 +2,10 @@
 Middleware y decoradores para autenticación JWT.
 """
 
-from fastapi import Depends, HTTPException, status, Request
+from fastapi import Depends, HTTPException, status, Request, Header
 from functools import wraps
 from typing import Callable, Optional
-from backend.services.token_service import TokenService
+from backend.core.security import TokenService
 
 
 class CurrentUser:
@@ -73,7 +73,7 @@ def verify_jwt_token(token: str) -> CurrentUser:
         )
 
 
-def get_current_user(authorization: Optional[str] = None) -> CurrentUser:
+def get_current_user(authorization: Optional[str] = Header(default=None)) -> CurrentUser:
     """
     Dependency para obtener usuario autenticado.
     
@@ -135,7 +135,7 @@ def require_role(*allowed_roles: str, allow_customer: bool = False):
     if not allowed_roles and not allow_customer:
         allowed_roles = ("admin", "customer")
     
-    def dependency(authorization: Optional[str] = None) -> Optional[int]:
+    def dependency(authorization: Optional[str] = Header(default=None)) -> Optional[int]:
         # Si allow_customer=True, permitir sin token
         if allow_customer and not authorization:
             return None
@@ -165,6 +165,57 @@ def require_role(*allowed_roles: str, allow_customer: bool = False):
         
         return current_user.user_id
     
+    return dependency
+
+
+def require_role_user(*allowed_roles: str):
+    """
+    Dependency inyectable que valida roles y retorna el objeto CurrentUser completo.
+
+    A diferencia de require_role (que retorna solo user_id: int), esta variante
+    retorna CurrentUser con user_id, email y role. Usarla cuando el service
+    necesita conocer el rol para lógica de autorización por transición (FSM).
+
+    Uso:
+    ```
+    @router.patch("/pedidos/{id}/estado")
+    def cambiar_estado(
+        id: int,
+        current_user: CurrentUser = Depends(require_role_user("CLIENT", "PEDIDOS", "ADMIN")),
+    ):
+        ...
+    ```
+
+    Args:
+        *allowed_roles: Roles permitidos (e.g., "CLIENT", "PEDIDOS", "ADMIN")
+
+    Returns:
+        Dependency que retorna CurrentUser (nunca None)
+    """
+    def dependency(authorization: Optional[str] = Header(default=None)) -> CurrentUser:
+        if not authorization:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Authorization header missing"
+            )
+
+        token = extract_token_from_header(authorization)
+        if not token:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid authorization header format"
+            )
+
+        current_user = verify_jwt_token(token)
+
+        if allowed_roles and current_user.role not in allowed_roles:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail=f"Insufficient permissions. Required roles: {', '.join(allowed_roles)}"
+            )
+
+        return current_user
+
     return dependency
 
 

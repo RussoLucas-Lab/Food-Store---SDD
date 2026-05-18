@@ -6,7 +6,7 @@ import {
   ClienteListResponse,
 } from '../../../shared/types';
 
-const API_ENDPOINT = '/clientes';
+const API_ENDPOINT = '/api/v1/clientes';
 
 /**
  * ClienteService

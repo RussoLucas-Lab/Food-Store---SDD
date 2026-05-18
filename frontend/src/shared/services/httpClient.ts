@@ -21,7 +21,8 @@ export const httpClient: AxiosInstance = axios.create({
  */
 httpClient.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
-    const token = localStorage.getItem('authToken');
+    const stored = localStorage.getItem('auth-store');
+    const token = stored ? JSON.parse(stored) : null;
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -86,8 +87,7 @@ httpClient.interceptors.response.use(
         return httpClient(originalRequest);
       } catch (refreshError) {
         processQueue(refreshError as AxiosError, null);
-        // Redirect to login (handle in app/router)
-        localStorage.removeItem('authToken');
+        localStorage.removeItem('auth-store');
         window.location.href = '/login';
         return Promise.reject(refreshError);
       }

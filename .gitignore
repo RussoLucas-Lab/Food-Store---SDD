@@ -37,6 +37,10 @@ Thumbs.db
 *.log
 logs/
 
+# Coverage reports
+htmlcov/
+.coverage
+
 # Engram (AI memory system)
 # Track chunks but ignore DB cache
 .engram/

@@ -1,10 +1,38 @@
 import React from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
+import { useUiStore } from '../../stores/uiStore';
+import { useCartStore } from '../../stores/cartStore';
+import CartDrawer from './CartDrawer';
+import ToastContainer from './ToastContainer';
 
 export interface HeaderProps {
   onMenuToggle?: () => void;
 }
+
+/**
+ * CartButton — Botón del carrito en el header con badge de cantidad.
+ */
+const CartButton: React.FC = () => {
+  const setCartOpen = useUiStore((s) => s.setCartOpen);
+  const items = useCartStore((s) => s.items);
+  const totalItems = items.reduce((sum, item) => sum + item.cantidad, 0);
+
+  return (
+    <button
+      onClick={() => setCartOpen(true)}
+      className="relative p-2 hover:bg-blue-700 rounded"
+      aria-label={`Abrir carrito (${totalItems} ítems)`}
+    >
+      <span className="text-lg" aria-hidden="true">🛒</span>
+      {totalItems > 0 && (
+        <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center leading-none">
+          {totalItems > 99 ? '99+' : totalItems}
+        </span>
+      )}
+    </button>
+  );
+};
 
 /**
  * Header: Top navigation bar with logo, nav links, user menu, theme toggle
@@ -31,12 +59,15 @@ export const Header: React.FC<HeaderProps> = ({ onMenuToggle }) => {
           <a href="/" className="hover:text-blue-200">
             Home
           </a>
-          {isAuthenticated && <a href="/productos">Productos</a>}
-          {isAuthenticated && <a href="/clientes">Clientes</a>}
-          {user?.role === 'ADMIN' && <a href="/admin">Admin</a>}
+          <a href="/productos" className="hover:text-blue-200">Catálogo</a>
+          {isAuthenticated && <a href="/mis-pedidos" className="hover:text-blue-200">Mis pedidos</a>}
+          {user?.role === 'ADMIN' && <a href="/admin" className="hover:text-blue-200">Admin</a>}
         </nav>
 
         <div className="flex items-center gap-4">
+          {/* Carrito */}
+          <CartButton />
+
           <button
             onClick={toggleTheme}
             className="p-2 hover:bg-blue-700 rounded"
@@ -115,19 +146,25 @@ export const Footer: React.FC = () => (
 );
 
 /**
- * Layout: Main layout wrapper combining Header, Sidebar, main content, Footer
+ * Layout: Main layout wrapper combining Header, Sidebar, main content, Footer.
+ * Integra CartDrawer y ToastContainer (siempre montados, visibles según estado).
  */
 export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [sidebarOpen, setSidebarOpen] = React.useState(true);
+  const sidebarOpen = useUiStore((s) => s.sidebarOpen);
+  const setSidebarOpen = useUiStore((s) => s.setSidebarOpen);
 
   return (
     <div className="flex flex-col min-h-screen">
       <Header onMenuToggle={() => setSidebarOpen(!sidebarOpen)} />
       <div className="flex flex-1">
-        <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+        <Sidebar isOpen={sidebarOpen} _onClose={() => setSidebarOpen(false)} />
         <main className="flex-1 overflow-auto bg-gray-50 p-4">{children}</main>
       </div>
       <Footer />
+      {/* CartDrawer siempre montado, visible/oculto según uiStore.cartOpen */}
+      <CartDrawer />
+      {/* ToastContainer siempre montado, registra el toast global */}
+      <ToastContainer />
     </div>
   );
 };

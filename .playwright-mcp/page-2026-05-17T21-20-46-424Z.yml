@@ -1,0 +1,19 @@
+- generic [ref=e3]:
+  - generic [ref=e4]:
+    - heading "🍽️ Food Store" [level=1] [ref=e5]
+    - paragraph [ref=e6]: Pedí tus comidas favoritas desde casa. Catálogo fresco, entregas rápidas y el mejor sabor directo a tu puerta.
+    - link "Ver catálogo →" [ref=e7] [cursor=pointer]:
+      - /url: /productos
+  - generic [ref=e8]:
+    - generic [ref=e9]:
+      - generic [ref=e10]: 🥗
+      - heading "Ingredientes frescos" [level=3] [ref=e11]
+      - paragraph [ref=e12]: Productos seleccionados cada día.
+    - generic [ref=e13]:
+      - generic [ref=e14]: 🚀
+      - heading "Entrega rápida" [level=3] [ref=e15]
+      - paragraph [ref=e16]: En tu puerta en tiempo récord.
+    - generic [ref=e17]:
+      - generic [ref=e18]: 💳
+      - heading "Pago seguro" [level=3] [ref=e19]
+      - paragraph [ref=e20]: MercadoPago y más opciones.

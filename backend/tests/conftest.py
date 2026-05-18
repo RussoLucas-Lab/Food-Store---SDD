@@ -1,22 +1,113 @@
 """
-Pytest fixtures para testing de clientes.
+Pytest configuration and fixtures for testing.
 
-Proporciona:
-- Mock UoW y repos
-- Cliente instances para testing
-- Fixtures de usuarios con roles variados (ADMIN, USER, GUEST)
+Consolidado desde:
+- tests/conftest.py (original pre-refactor)
+- backend/tests/conftest.py (fixtures de clientes)
 """
 
 import pytest
-from unittest.mock import Mock, MagicMock
+from unittest.mock import Mock
 from datetime import datetime
 
-# Import Cliente - handle both absolute and relative imports
-try:
-    from models.cliente import Cliente
-except ImportError:
-    from backend.models.cliente import Cliente
+from backend.modules.clientes.model import Cliente
 
+
+# Pytest hook: runs BEFORE test collection
+def pytest_configure(config):
+    """Configure pytest before tests are collected."""
+    import slowapi
+    slowapi.Limiter.limit = lambda self, *args, **kwargs: lambda f: f
+
+
+def _reset_repo(repo):
+    """Reset an in-memory repository to a clean state."""
+    repo._storage.clear()
+    repo._next_id = 1
+    # Clear any name/email index if present
+    for attr in ('_name_index', '_email_index'):
+        if hasattr(repo, attr):
+            getattr(repo, attr).clear()
+
+
+@pytest.fixture(autouse=True)
+def override_get_uow():
+    """
+    Override FastAPI's get_uow dependency with InMemoryUnitOfWork for all tests.
+
+    This prevents endpoint tests from attempting a real PostgreSQL connection.
+    Strategy:
+    1. Override app.dependency_overrides on the main app (covers most endpoint tests
+       that use `backend.main.app`).
+    2. Patch FastAPI.__init__ so that ANY fresh FastAPI() app created inside a test
+       fixture (e.g. the `simple_app` fixtures that create standalone apps) also
+       gets the dependency override injected at construction time.
+    3. Re-attach .uow attribute on router modules for test files that reference
+       router_mod.uow directly (backwards-compatible with pre-DI tests).
+
+    A fresh InMemoryUnitOfWork instance is created per test, guaranteeing isolation.
+    """
+    from fastapi import FastAPI
+    from backend.main import app as main_app
+    from backend.core.deps import get_uow as original_get_uow
+    from backend.core.uow_inmemory import InMemoryUnitOfWork
+
+    import backend.modules.pedidos.router as pedidos_router_mod
+    import backend.modules.productos.router as prod_router_mod
+    import backend.modules.clientes.router as cli_router_mod
+
+    test_uow = InMemoryUnitOfWork()
+
+    # Function used as override — returns the shared test_uow instance
+    def _inmemory_get_uow():
+        return test_uow
+
+    # 1. Override on the main app's dependency injection system
+    main_app.dependency_overrides[original_get_uow] = _inmemory_get_uow
+
+    # 2. Patch FastAPI.__init__ so any new FastAPI() app created during this test
+    #    also gets the override. This handles `simple_app` fixtures that do:
+    #        app = FastAPI(); app.include_router(some_router)
+    _original_fastapi_init = FastAPI.__init__
+
+    def _patched_fastapi_init(self, *args, **kwargs):
+        _original_fastapi_init(self, *args, **kwargs)
+        self.dependency_overrides[original_get_uow] = _inmemory_get_uow
+
+    FastAPI.__init__ = _patched_fastapi_init
+
+    # 3. Re-attach .uow on router modules for backwards-compatible test references
+    #    (tests that access router_mod.uow directly)
+    pedidos_router_mod.uow = test_uow
+    prod_router_mod.uow = test_uow
+    cli_router_mod.uow = test_uow
+
+    yield test_uow
+
+    # Teardown: restore original FastAPI.__init__ and clean up overrides
+    FastAPI.__init__ = _original_fastapi_init
+    main_app.dependency_overrides.pop(original_get_uow, None)
+    # Remove dynamically-attached uow from router modules
+    for mod in (pedidos_router_mod, prod_router_mod, cli_router_mod):
+        if 'uow' in mod.__dict__:
+            try:
+                delattr(mod, 'uow')
+            except AttributeError:
+                pass
+
+
+@pytest.fixture(autouse=True)
+def reset_token_service():
+    """
+    Reset the token service's refresh token store before each test.
+    """
+    from backend.core.security import TokenService
+    TokenService._refresh_token_store = {}
+    yield
+    TokenService._refresh_token_store = {}
+
+
+# --- Fixtures de Cliente ---
 
 @pytest.fixture
 def mock_uow():

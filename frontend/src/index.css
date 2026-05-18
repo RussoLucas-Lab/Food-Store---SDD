@@ -1,3 +1,7 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 /* Base styles */
 * {
   margin: 0;
@@ -40,4 +44,11 @@ button:focus,
 input:focus {
   outline: 2px solid var(--color-primary);
   outline-offset: 2px;
+}
+
+input,
+textarea,
+select {
+  color: #111827;
+  background-color: #ffffff;
 }

@@ -1,1 +1,2 @@
-﻿// Placeholder for pages exports
+export { default as CatalogoPage } from './CatalogoPage';
+export { default as ProductoDetailPage } from './ProductoDetailPage';

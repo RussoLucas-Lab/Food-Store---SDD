@@ -10,3 +10,6 @@
 
 export { Header, Sidebar, Footer, Layout, Modal } from './Layout';
 export type { HeaderProps, ModalProps } from './Layout';
+
+export { default as CartDrawer } from './CartDrawer';
+export { default as ToastContainer } from './ToastContainer';

@@ -1,3 +1,4 @@
+from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
@@ -9,17 +10,45 @@ from dotenv import load_dotenv
 from pathlib import Path
 
 # Importar routers
-from .routers.auth import router as auth_router
-from .routers.categorias import router as categorias_router
-from .routers.ingredientes import router as ingredientes_router
-from .routers.productos import router as productos_router
-from .routers.clientes import router as clientes_router
+from .modules.auth.router import router as auth_router
+from .modules.categorias.router import router as categorias_router
+from .modules.ingredientes.router import router as ingredientes_router
+from .modules.productos.router import router as productos_router
+from .modules.clientes.router import router as clientes_router
+from .modules.pedidos.router import router as pedidos_router
+from .modules.direcciones.router import router as direcciones_router
+from .modules.pagos.router import router as pagos_router
+from .modules.admin.router import router as admin_router
 
 # Cargar variables de entorno
 load_dotenv(dotenv_path=Path(__file__).parent.parent / '.env', override=True)
 
 # Configurar rate limiter
 limiter = Limiter(key_func=get_remote_address)
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # 1. Aplicar migraciones de Alembic (o crear tablas como fallback)
+    try:
+        from alembic.config import Config
+        from alembic import command
+        from pathlib import Path as _Path
+        alembic_cfg = Config(str(_Path(__file__).parent.parent / "alembic.ini"))
+        command.upgrade(alembic_cfg, "head")
+    except Exception as e:
+        import logging
+        logging.getLogger(__name__).warning(
+            f"Alembic upgrade failed ({e}), falling back to create_all_tables()"
+        )
+        from .core.database import create_all_tables
+        create_all_tables()
+
+    # 2. Seed de datos iniciales (idempotente)
+    from .db.seed import seed_initial_data
+    seed_initial_data()
+    yield
+
 
 # Crear aplicación FastAPI
 app = FastAPI(
@@ -28,7 +57,8 @@ app = FastAPI(
     version="0.1.0",
     docs_url="/docs",
     redoc_url="/redoc",
-    openapi_url="/openapi.json"
+    openapi_url="/openapi.json",
+    lifespan=lifespan,
 )
 
 # Aplicar rate limiter
@@ -56,10 +86,14 @@ async def rate_limit_handler(request: Request, exc: RateLimitExceeded):
 # ============================================================================
 
 app.include_router(auth_router)
-app.include_router(categorias_router)
-app.include_router(ingredientes_router)
-app.include_router(productos_router)
-app.include_router(clientes_router)
+app.include_router(categorias_router, prefix="/api/v1")
+app.include_router(ingredientes_router, prefix="/api/v1")
+app.include_router(productos_router, prefix="/api/v1")
+app.include_router(clientes_router, prefix="/api/v1")
+app.include_router(pedidos_router, prefix="/api/v1")
+app.include_router(direcciones_router, prefix="/api/v1")
+app.include_router(pagos_router, prefix="/api/v1")
+app.include_router(admin_router, prefix="/api/v1/admin")
 
 # ============================================================================
 # Endpoints públicos
